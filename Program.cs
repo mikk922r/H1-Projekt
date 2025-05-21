@@ -6,10 +6,6 @@ namespace Projekt
     {
         public static void Main(string[] args)
         {
-            // HEJSA
-
-
-
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
