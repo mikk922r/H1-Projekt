@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Configuration;
 using Npgsql;
-using Microsoft.Extensions.Configuration;
 using Projekt.Models;
 
 namespace Projekt.Services
@@ -13,9 +10,9 @@ namespace Projekt.Services
 
         public DBService(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _connectionString = configuration.GetConnectionString("DefaultConnection")!;
+    
         }
-
         public async Task<bool> TestConnectionAsync()
         {
             try
@@ -30,33 +27,35 @@ namespace Projekt.Services
             }
         }
 
-       
-
-        public async Task<List<Users>> GetAllUsersAsync()
+        // Get All Users
+        public async Task<List<Users>> GetAllUsers()
         {
-            var list = new List<Users>();
-            await using var conn = new NpgsqlConnection(_connectionString);
-            await conn.OpenAsync();
-
-            const string sql = "SELECT id, name, email, phone_code, phone_number FROM users;";
-            await using var cmd = new NpgsqlCommand(sql, conn);
-            await using var reader = await cmd.ExecuteReaderAsync();
-
-            while (await reader.ReadAsync())
+            using (var connection = new NpgsqlConnection(_connectionString))
             {
-                list.Add(new Users
+                await connection.OpenAsync();
+
+                using (var command = new NpgsqlCommand("SELECT * FROM users", connection))
+                using (var reader = await command.ExecuteReaderAsync())
                 {
-                    ID = reader.GetInt32(reader.GetOrdinal("id")),
-                    name = reader.GetString(reader.GetOrdinal("name")),
-                    email = reader.GetString(reader.GetOrdinal("email")),
-                    phone_code = reader.GetInt32(reader.GetOrdinal("phone_code")),
-                    phone_number = reader.GetString(reader.GetOrdinal("phone_number"))
-                });
+                    var users = new List<Users>();
+
+                    while (await reader.ReadAsync())
+                    {
+                        users.Add(
+                          new Users
+                          {
+                              Id = reader.GetInt32(reader.GetOrdinal("id")),
+                              Name = reader.GetString(reader.GetOrdinal("name")),
+                              Email = reader.GetString(reader.GetOrdinal("email")),
+                              PhoneCode = reader.GetInt32(reader.GetOrdinal("phone_code")),
+                              PhoneNumber = reader.GetString(reader.GetOrdinal("phone_number")),
+                          }
+                      );
+                    }
+
+                    return users;
+                }
             }
-
-            return list;
         }
-
-     
     }
 }

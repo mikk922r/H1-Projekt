@@ -1,61 +1,33 @@
 ﻿@page "/"
-@using Projekt.Models
-@inject Projekt.Services.DBService DBService
 @rendermode InteractiveServer
+@inject DBService DBService
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <span class="badge fs-6 @(isConnected ? "bg-success" : "bg-danger")">
-            @(isConnected ? "🟢 Connected" : "🔴 Not Connected")
-        </span>
-    </div>
+<p>@(isConnected ? "Connected to the database" : "Not connected to the database")</p>
 
-    <div class="mb-3">
-        <button class="btn btn-primary me-2" @onclick="GetUsers">Load Users</button>
-        <!-- you can add more action buttons here -->
-    </div>
+<button class="my-3 btn btn-primary" @onclick="GetUsers">Get Users</button>
 
-    @if (users?.Any() == true)
+<ul>
+    @foreach (var user in users)
     {
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered">
-                <thead class="table-light">
-                    <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">Email</th>
-                        <th scope="col">Phone</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var u in users)
-                    {
-                        <tr>
-                            <td>@u.name</td>
-                            <td>@u.email</td>
-                            <td>+@u.phone_code @u.phone_number</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+        <li>@user.Id</li>
+        <li>@user.Name</li>
+        <li>@user.Email</li>
+        <li>+@user.PhoneCode@user.PhoneNumber</li>
     }
-    else
-    {
-        <div class="alert alert-info text-center">No users found. Click "Load Users" to fetch data.</div>
-    }
-</div>
+</ul>
 
 @code {
-    private List<Users> users = new();
-    private bool isConnected;
+    bool isConnected = false;
 
     protected override async Task OnInitializedAsync()
     {
         isConnected = await DBService.TestConnectionAsync();
     }
 
+    List<Users> users = new List<Users>();
+
     private async Task GetUsers()
     {
-        users = await DBService.GetAllUsersAsync();
+        users = await DBService.GetAllUsers();
     }
 }
