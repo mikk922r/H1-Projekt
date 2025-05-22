@@ -28,7 +28,7 @@ namespace Projekt.Services
         }
 
         // Get All Users
-        public async Task<List<Users>> GetAllUsers()
+        public async Task<List<Users>> GetAllUsersAsync()
         {
             using (var connection = new NpgsqlConnection(_connectionString))
             {
