@@ -1,5 +1,5 @@
 using Projekt.Components;
-
+using Projekt.Services;
 namespace Projekt
 {
     public class Program
@@ -12,6 +12,7 @@ namespace Projekt
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
+            builder.Services.AddScoped<DBService>();
             var app = builder.Build();
             
             // Configure the HTTP request pipeline.
