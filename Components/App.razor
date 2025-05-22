@@ -18,6 +18,15 @@
 <body>
     <Routes />
     <script src="_framework/blazor.web.js"></script>
+    <script>
+        window.updateInputValueById = function (id, value) {
+            const input = document.getElementById(id);
+
+            if (!input) return;
+
+            input.value = value;
+        };
+    </script>
 </body>
 
 </html>

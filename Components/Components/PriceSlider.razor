@@ -1,0 +1,56 @@
+﻿@rendermode InteractiveServer
+@inject IJSRuntime JS
+
+<div class="d-flex flex-column gap-2">
+    <div class="d-flex justify-content-between">
+        <span>Pris</span>
+        <span>@firstValue kr - @secondValue kr</span>
+    </div>
+
+    <div class="position-relative rounded-2 w-100 mb-2" style="height: 5px; background-color: rgba(0, 0, 0, 0.5)">
+        <div class="position-absolute" style="background-color: #1b6ec2; height: 5px; left: @leftValue; right: @rightValue"></div>
+
+        <input id="first" type="range" class="position-absolute w-100 top-50 translate-middle-y" min="0" max="10000" step="100" value="@firstValue" @oninput="(e) => OnInput(e, true)"  />
+        <input id="second" type="range" class="position-absolute w-100 top-50 translate-middle-y" min="0" max="10000" step="100" value="@secondValue" @oninput="(e) => OnInput(e, false)" />
+    </div>
+</div>
+
+@code {
+    private int firstValue { get; set; } = 0;
+
+    private int secondValue { get; set; } = 10000;
+
+    private string leftValue { get; set; } = "0%";
+
+    private string rightValue { get; set; } = "0%";
+
+    private async Task OnInput(ChangeEventArgs e, bool isFirstInput)
+    {
+        if (!int.TryParse(e.Value?.ToString() ?? string.Empty, out int value))
+        {
+            return;
+        }
+
+        if (isFirstInput)
+        {
+            firstValue = Math.Min(value, secondValue);
+
+            await JS.InvokeVoidAsync("updateInputValueById", "first", firstValue);
+        }
+        else
+        {
+            secondValue = Math.Max(value, firstValue);
+
+            await JS.InvokeVoidAsync("updateInputValueById", "second", secondValue);
+        }
+
+        decimal firstValueDouble = (decimal)firstValue / 10000M;
+        decimal secondValueDouble = (decimal)secondValue / 10000M;
+
+        int leftValueDouble = (int)(firstValueDouble * 100);
+        int rightValueDouble = (int)(100 - secondValueDouble * 100);
+
+        leftValue = leftValueDouble + "%";
+        rightValue = rightValueDouble + "%";
+    }
+}
