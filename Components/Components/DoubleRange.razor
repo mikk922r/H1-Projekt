@@ -1,0 +1,77 @@
+﻿@rendermode InteractiveServer
+@inject IJSRuntime JS
+
+<div class="d-flex align-items-center" style="height: 20px;">
+    <div class="position-relative rounded-2 w-100" style="height: 5px; background-color: rgba(0, 0, 0, 0.5)">
+        <div class="position-absolute rounded-2" style="background-color: #1b6ec2; height: 5px; left: @GetLeftValue(); right: @GetRightValue()"></div>
+
+        <input id="first" type="range" class="position-absolute w-100 top-50 translate-middle-y" min="@min" max="@max" step="@step" value="@firstValue" @oninput="(e) => OnInput(e, true)" />
+        <input id="second" type="range" class="position-absolute w-100 top-50 translate-middle-y" min="@min" max="@max" step="@step" value="@secondValue" @oninput="(e) => OnInput(e, false)" />
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int min { get; set; } = 0;
+
+    [Parameter]
+    public int max { get; set; } = 10000;
+
+    [Parameter]
+    public int step { get; set; } = 100;
+
+    [Parameter]
+    public int firstValue { get; set; } = 0;
+
+    [Parameter]
+    public EventCallback<int> firstValueChanged { get; set; }
+
+    [Parameter]
+    public int secondValue { get; set; } = 10000;
+
+    [Parameter]
+    public EventCallback<int> secondValueChanged { get; set; }
+
+    private async Task OnInput(ChangeEventArgs e, bool isFirstInput)
+    {
+        if (!int.TryParse(e.Value?.ToString() ?? string.Empty, out int value))
+        {
+            return;
+        }
+
+        if (isFirstInput)
+        {
+            firstValue = Math.Min(value, secondValue);
+
+            await firstValueChanged.InvokeAsync(firstValue);
+
+            await JS.InvokeVoidAsync("updateInputValueById", "first", firstValue);
+        }
+        else
+        {
+            secondValue = Math.Max(value, firstValue);
+
+            await secondValueChanged.InvokeAsync(secondValue);
+
+            await JS.InvokeVoidAsync("updateInputValueById", "second", secondValue);
+        }
+    }
+
+    private string GetLeftValue()
+    {
+        decimal firstValueDouble = (decimal)firstValue / 10000M;
+
+        int leftValueDouble = (int)(firstValueDouble * 100);
+
+        return leftValueDouble + "%";
+    }
+
+    private string GetRightValue()
+    {
+        decimal secondValueDouble = (decimal)secondValue / 10000M;
+
+        int rightValueDouble = (int)(100 - secondValueDouble * 100);
+
+        return rightValueDouble + "%";
+    }
+}

@@ -1,6 +1,6 @@
 ﻿@using Projekt.Components.Components
 
-<div class="hiding">
+<div style="width: 16rem">
     <div class="position-sticky" style="top: 1rem">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h3 class="fw-semibold">Filter</h3>
@@ -8,9 +8,13 @@
             <button class="btn btn-primary btn-sm" @onclick="Reset">Reset</button>
         </div>
 
-        <h5 class="mb-2">Prisgrænse</h5>
+        <div class="mb-2 d-flex justify-content-between">
+            <h5>Pris</h5>
 
-        <PriceSlider min="@minPrice" minChanged="(value) => minPriceChanged.InvokeAsync(value)" max="@maxPrice" maxChanged="(value) => maxPriceChanged.InvokeAsync(value)" />
+            <h5>@minPrice kr - @maxPrice kr</h5>
+        </div>
+
+        <DoubleRange min="0" max="10000" step="100" firstValue="@minPrice" firstValueChanged="(value) => minPriceChanged.InvokeAsync(value)" secondValue="@maxPrice" secondValueChanged="(value) => maxPriceChanged.InvokeAsync(value)" />
 
         <hr class="my-3" />
 
@@ -28,7 +32,7 @@
 
         <h5 class="mb-2">Størelser</h5>
 
-        <div class="d-flex gap-3">
+        <div class="d-flex flex-wrap gap-2">
             @foreach (var size in _sizes)
             {
                 <label class="p-2 d-flex gap-2 align-items-center" style="margin: -8px;">
@@ -43,7 +47,7 @@
 
         <h5 class="mb-2">Farver</h5>
 
-        <div class="d-flex gap-3">
+        <div class="d-flex flex-wrap gap-2">
             @foreach (var color in _colors)
             {
                 <button type="button" class="btn color @(GetColorClass(color) + (colors.Contains(color) ? " active" : ""))" @onclick="() => ToggleColor(color)"></button>
@@ -53,6 +57,9 @@
 </div>
 
 @code {
+    private List<string> _sizes = new List<string> { "XS", "S", "M", "L", "XL", "XXL" };
+    private List<Colors> _colors = Enum.GetValues(typeof(Colors)).Cast<Colors>().ToList();
+
     [Parameter]
     public int minPrice { get; set; } = 0;
 
@@ -65,15 +72,11 @@
     [Parameter]
     public EventCallback<int> maxPriceChanged { get; set; }
 
-    private List<string> _sizes = new List<string> { "XS", "S", "M", "L", "XL", "XXL" };
-
     [Parameter]
-    public List<string> sizes { get; set;  } = new List<string>();
+    public List<string> sizes { get; set; } = new List<string>();
 
     [Parameter]
     public EventCallback<List<string>> sizesChanged { get; set; }
-
-    private List<Colors> _colors = Enum.GetValues(typeof(Colors)).Cast<Colors>().ToList();
 
     [Parameter]
     public List<Colors> colors { get; set; } = new List<Colors>();
