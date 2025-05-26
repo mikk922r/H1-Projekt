@@ -8,9 +8,9 @@
     </div>
 
     <div class="position-relative rounded-2 w-100 mb-2" style="height: 5px; background-color: rgba(0, 0, 0, 0.5)">
-        <div class="position-absolute" style="background-color: #1b6ec2; height: 5px; left: @leftValue; right: @rightValue"></div>
+        <div class="position-absolute rounded-2" style="background-color: #1b6ec2; height: 5px; left: @leftValue; right: @rightValue"></div>
 
-        <input id="first" type="range" class="position-absolute w-100 top-50 translate-middle-y" min="0" max="10000" step="100" value="@firstValue" @oninput="(e) => OnInput(e, true)"  />
+        <input id="first" type="range" class="position-absolute w-100 top-50 translate-middle-y" min="0" max="10000" step="100" value="@firstValue" @oninput="(e) => OnInput(e, true)" />
         <input id="second" type="range" class="position-absolute w-100 top-50 translate-middle-y" min="0" max="10000" step="100" value="@secondValue" @oninput="(e) => OnInput(e, false)" />
     </div>
 </div>
