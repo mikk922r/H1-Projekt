@@ -21,13 +21,13 @@
     public int step { get; set; } = 100;
 
     [Parameter]
-    public int firstValue { get; set; } = 0;
+    public int firstValue { get; set; }
 
     [Parameter]
     public EventCallback<int> firstValueChanged { get; set; }
 
     [Parameter]
-    public int secondValue { get; set; } = 10000;
+    public int secondValue { get; set; }
 
     [Parameter]
     public EventCallback<int> secondValueChanged { get; set; }
@@ -59,18 +59,28 @@
 
     private string GetLeftValue()
     {
-        decimal firstValueDouble = (decimal)firstValue / 10000M;
+        decimal firstValueDouble = (decimal)firstValue / (decimal)max;
 
         int leftValueDouble = (int)(firstValueDouble * 100);
+
+        if (leftValueDouble < 0)
+        {
+            leftValueDouble = 0;
+        }
 
         return leftValueDouble + "%";
     }
 
     private string GetRightValue()
     {
-        decimal secondValueDouble = (decimal)secondValue / 10000M;
+        decimal secondValueDouble = (decimal)secondValue / (decimal)max;
 
         int rightValueDouble = (int)(100 - secondValueDouble * 100);
+
+        if (rightValueDouble < 0)
+        {
+            rightValueDouble = 0;
+        }
 
         return rightValueDouble + "%";
     }
