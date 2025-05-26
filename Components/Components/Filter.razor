@@ -32,7 +32,7 @@
             @foreach (var size in _sizes)
             {
                 <label class="p-2 d-flex gap-2 align-items-center" style="margin: -8px;">
-                    <input class="form-check-input mt-0" type="checkbox" value="@size" @onchange="() => SizeToggled(size)" />
+                    <input class="form-check-input mt-0" type="checkbox" checked="@sizes.Contains(size)" value="@size" @onchange="() => SizeToggled(size)" />
 
                     <span>@size</span>
                 </label>
