@@ -8,18 +8,125 @@
             <button class="btn btn-primary btn-sm" @onclick="Reset">Reset</button>
         </div>
 
-        <div>
-            <h5 class="mb-2">Prisgrænse</h5>
+        <h5 class="mb-2">Prisgrænse</h5>
 
-            <PriceSlider />
+        <PriceSlider min="@minPrice" minChanged="(value) => minPriceChanged.InvokeAsync(value)" max="@maxPrice" maxChanged="(value) => maxPriceChanged.InvokeAsync(value)" />
+
+        <hr class="my-3" />
+
+        <h5 class="mb-2">Kategorier</h5>
+
+        <div class="d-flex flex-column gap-2">
+            <label class="p-2 d-flex gap-2 align-items-center" style="margin: -8px;">
+                <input class="form-check-input mt-0" type="checkbox" value="" aria-label="Checkbox for following text input">
+
+                <span>T-Shirts</span>
+            </label>
+        </div>
+
+        <hr class="my-3" />
+
+        <h5 class="mb-2">Størelser</h5>
+
+        <div class="d-flex gap-3">
+            @foreach (var size in _sizes)
+            {
+                <label class="p-2 d-flex gap-2 align-items-center" style="margin: -8px;">
+                    <input class="form-check-input mt-0" type="checkbox" value="@size" @onchange="() => SizeToggled(size)" />
+
+                    <span>@size</span>
+                </label>
+            }
+        </div>
+
+        <hr class="my-3" />
+
+        <h5 class="mb-2">Farver</h5>
+
+        <div class="d-flex gap-3">
+            @foreach (var color in _colors)
+            {
+                <button type="button" class="btn color @(GetColorClass(color) + (colors.Contains(color) ? " active" : ""))" @onclick="() => ToggleColor(color)"></button>
+            }
         </div>
     </div>
 </div>
 
 @code {
+    [Parameter]
+    public int minPrice { get; set; } = 0;
+
+    [Parameter]
+    public EventCallback<int> minPriceChanged { get; set; }
+
+    [Parameter]
+    public int maxPrice { get; set; } = 10000;
+
+    [Parameter]
+    public EventCallback<int> maxPriceChanged { get; set; }
+
+    private List<string> _sizes = new List<string> { "XS", "S", "M", "L", "XL", "XXL" };
+
+    [Parameter]
+    public List<string> sizes { get; set;  } = new List<string>();
+
+    [Parameter]
+    public EventCallback<List<string>> sizesChanged { get; set; }
+
+    private List<Colors> _colors = Enum.GetValues(typeof(Colors)).Cast<Colors>().ToList();
+
+    [Parameter]
+    public List<Colors> colors { get; set; } = new List<Colors>();
+
+    [Parameter]
+    public EventCallback<List<Colors>> colorsChanged { get; set; }
+
     private void Reset()
     {
-        // Reset filter logic here
+        minPrice = 0;
+        maxPrice = 10000;
+
+        minPriceChanged.InvokeAsync(minPrice);
+        maxPriceChanged.InvokeAsync(maxPrice);
+
+        sizes.Clear();
+        colors.Clear();
+
+        sizesChanged.InvokeAsync(sizes);
+        colorsChanged.InvokeAsync(colors);
+    }
+
+    private void SizeToggled(string size)
+    {
+        if (sizes.Contains(size))
+        {
+            sizes.Remove(size);
+        }
+        else
+        {
+            sizes.Add(size);
+        }
+
+        sizesChanged.InvokeAsync(sizes);
+    }
+
+    private void ToggleColor(Colors color)
+    {
+        if (colors.Contains(color))
+        {
+            colors.Remove(color);
+        }
+        else
+        {
+            colors.Add(color);
+        }
+
+        colorsChanged.InvokeAsync(colors);
+    }
+
+    private string GetColorClass(Colors color)
+    {
+        return Enum.GetName(typeof(Colors), color)?.ToLowerInvariant() ?? string.Empty;
     }
 }
 

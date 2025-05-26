@@ -1,8 +1,17 @@
 ﻿@page "/test"
 @rendermode InteractiveServer
 
-<Filter />
+<Filter @bind-minPrice="minPrice" @bind-maxPrice="maxPrice" @bind-sizes="sizes" @bind-colors="colors" />
+
+<p>@minPrice kr - @maxPrice kr</p>
+
+<p>Størrelser: @string.Join(", ", sizes)</p>
+
+<p>Farver: @string.Join(", ", colors.Select(c => Enum.GetName(typeof(Colors), c)))</p>
 
 @code {
-
+    private int minPrice = 0;
+    private int maxPrice = 10000;
+    private List<string> sizes = new List<string>();
+    private List<Colors> colors = new List<Colors>();
 }
