@@ -1,6 +1,6 @@
 ﻿@using Projekt.Components.Components
 
-<div style="width: 16rem">
+<div id="filter">
     <div class="position-sticky" style="top: 1rem">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h3 class="fw-semibold">Filter</h3>
@@ -24,7 +24,7 @@
             <label class="p-2 d-flex gap-2 align-items-center" style="margin: -8px;">
                 <input class="form-check-input mt-0" type="checkbox" value="" aria-label="Checkbox for following text input">
 
-                <span>T-Shirts</span>
+                <span class="user-select-none">T-Shirts</span>
             </label>
         </div>
 
@@ -38,7 +38,7 @@
                 <label class="p-2 d-flex gap-2 align-items-center" style="margin: -8px;">
                     <input class="form-check-input mt-0" type="checkbox" checked="@sizes.Contains(size)" value="@size" @onchange="() => SizeToggled(size)" />
 
-                    <span>@size</span>
+                    <span class="user-select-none">@size</span>
                 </label>
             }
         </div>

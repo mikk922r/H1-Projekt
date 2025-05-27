@@ -1,0 +1,40 @@
+﻿footer {
+    border-top: 1px solid rgba(17, 17, 17, 0.15);
+}
+
+    footer > div:first-child {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        max-width: 80rem;
+    }
+
+    footer > div:last-child {
+        border-top: 1px solid rgba(17, 17, 17, 0.15);
+        padding-top: 2rem;
+        margin-top: 2rem;
+        max-width: 80rem;
+    }
+
+        footer > div:last-child p {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+
+        footer > div:last-child a {
+            transition: background-color 0.25s ease-in-out;
+            font-size: 0.75rem;
+            line-height: 1rem;
+            min-height: 2rem;
+            min-width: 2rem;
+            height: 2rem;
+            width: 2rem;
+        }
+
+        footer > div:last-child a:hover {
+            background-color: rgba(17, 17, 17, 0.15);
+        }
+
+@media (min-width: 768px) {
+    footer > div:first-child {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
