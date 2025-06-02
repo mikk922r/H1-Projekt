@@ -84,17 +84,17 @@ namespace Projekt.Services
             return (int)await cmd.ExecuteScalarAsync();
         }
 
-        public async Task<List<Brands>> GetAllBrandsAsync()
+        public async Task<List<Brand>> GetAllBrandsAsync()
         {
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
             using var cmd = new NpgsqlCommand("SELECT id, name FROM brands ORDER BY name", conn);
             using var rdr = await cmd.ExecuteReaderAsync();
 
-            var list = new List<Brands>();
+            var list = new List<Brand>();
             while (await rdr.ReadAsync())
             {
-                list.Add(new Brands
+                list.Add(new Brand
                 {
                     Id = rdr.GetInt32(0),
                     Name = rdr.GetString(1)
@@ -103,17 +103,17 @@ namespace Projekt.Services
             return list;
         }
 
-        public async Task<List<Categories>> GetAllCategoriesAsync()
+        public async Task<List<Category>> GetAllCategoriesAsync()
         {
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
             using var cmd = new NpgsqlCommand("SELECT id, name, parent_category_id FROM categories ORDER BY name", conn);
             using var rdr = await cmd.ExecuteReaderAsync();
 
-            var list = new List<Categories>();
+            var list = new List<Category>();
             while (await rdr.ReadAsync())
             {
-                list.Add(new Categories
+                list.Add(new Category
                 {
                     Id = rdr.GetInt32(0),
                     Name = rdr.GetString(1),

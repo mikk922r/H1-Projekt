@@ -1,0 +1,27 @@
+﻿@inject CurrentUserService Auth
+@inject NavigationManager Nav
+
+<nav class="d-flex z-3 w-100 h-auto align-items-center justify-content-center position-sticky">
+    <header class="d-flex px-4 gap-3">
+        <div class="flex-grow-1">
+            <a href="/" class="d-flex align-items-center gap-2 link-dark link-underline-opacity-0 fw-semibold">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--lucide" data-locator="src/App.tsx:Icon:19:12" width="24" height="24" viewBox="0 0 24 24">
+                    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4ZM3 6h18"></path>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </g>
+                </svg>
+
+                Tøjmarkedsplads
+            </a>
+        </div>
+    </header>
+</nav>
+
+@code {
+    private void Logout()
+    {
+        Auth.SignOut();
+        Nav.NavigateTo("/");
+    }
+}

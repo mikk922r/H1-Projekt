@@ -1,0 +1,15 @@
+﻿nav {
+    border-bottom: 1px solid rgba(17, 17, 17, 0.15);
+    backdrop-filter: blur(16px) saturate(1.5);
+    right: 0;
+    left: 0;
+    top: 0;
+}
+
+    nav header {
+    }
+
+        nav header > div > a {
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+        }

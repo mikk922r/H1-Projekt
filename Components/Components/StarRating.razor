@@ -1,0 +1,82 @@
+﻿@rendermode InteractiveServer
+
+<div class="d-flex">
+    @for (int i = 1; i <= 5; i++)
+    {
+        int position = i;
+
+        <span class="fs-3 m-0 user-select-none" role="button" @onmouseover="() => HandleMouseOver(position)" @onmouseout="HandleMouseOut" @onclick="() => SetRating(position)">
+            @(position <= (hoverRating ?? rating) ? "★" : "☆")
+        </span>
+    }
+
+    @if (!readOnly && showReset && rating is not null)
+    {
+        <h3 class="m-0" role="button" @onclick="Reset">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+            </svg>
+        </h3>
+    }
+</div>
+
+@rating - @hoverRating
+
+@code {
+    [Parameter]
+    public int? rating { get; set; }
+
+    [Parameter]
+    public EventCallback<int?> ratingChanged { get; set; }
+
+    [Parameter]
+    public bool showReset { get; set; } = true;
+
+    [Parameter]
+    public bool readOnly { get; set; } = false;
+
+    private int? hoverRating;
+
+    private void SetRating(int value)
+    {
+        if (readOnly)
+        {
+            return;
+        }
+
+        rating = value;
+
+        ratingChanged.InvokeAsync(value);
+
+        hoverRating = null;
+    }
+
+    private void HandleMouseOver(int value)
+    {
+        if (readOnly)
+        {
+            return;
+        }
+
+        hoverRating = value;
+    }
+
+    private void HandleMouseOut()
+    {
+        if (readOnly)
+        {
+            return;
+        }
+
+        hoverRating = null;
+    }
+
+    private void Reset()
+    {
+        rating = null;
+
+        ratingChanged.InvokeAsync(rating);
+
+        hoverRating = null;
+    }
+}
