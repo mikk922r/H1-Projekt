@@ -125,20 +125,20 @@ namespace Projekt.Services
         public async Task<int> AddProductAsync(Products prod)
         {
             const string sql = @"
-                INSERT INTO products
-                  (name, description, price, color, size, quantity, used,
-                   brand_id, category_id, user_id)
-                VALUES
-                  (@name, @desc, @price, @color, @size, @qty, @used,
-                   @brand, @cat, @user)
-                RETURNING id;
-            ";
+        INSERT INTO products
+          (name, description, price, color, size, quantity, used,
+           brand_id, category_id, user_id, image)
+        VALUES
+          (@name, @desc, @price, @color, @size, @qty, @used,
+           @brand, @cat, @user, @image)
+        RETURNING id;
+    ";
 
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
             await using var cmd = new NpgsqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("name", prod.Name);
-            cmd.Parameters.AddWithValue("desc", prod.Description);
+            cmd.Parameters.AddWithValue("desc", prod.Description ?? "");
             cmd.Parameters.AddWithValue("price", prod.Price);
             cmd.Parameters.AddWithValue("color", (object?)prod.Color ?? DBNull.Value);
             cmd.Parameters.AddWithValue("size", (object?)prod.Size ?? DBNull.Value);
@@ -148,7 +148,147 @@ namespace Projekt.Services
             cmd.Parameters.AddWithValue("cat", prod.CategoryId);
             cmd.Parameters.AddWithValue("user", prod.UserId);
 
+            // NEW: handle the "image" column
+            if (string.IsNullOrWhiteSpace(prod.Image))
+                cmd.Parameters.AddWithValue("image", DBNull.Value);
+            else
+                cmd.Parameters.AddWithValue("image", prod.Image);
+
             return (int)await cmd.ExecuteScalarAsync();
         }
+
+
+
+
+        public async Task<List<Products>> GetAllProductsAsync()
+        {
+            const string sql = @"
+        SELECT id,
+               name,
+               description,
+               price,
+               color,
+               size,
+               quantity,
+               used,
+               brand_id,
+               category_id,
+               user_id,
+               image
+          FROM products
+         ORDER BY name;
+    ";
+
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            using var rdr = await cmd.ExecuteReaderAsync();
+
+            var list = new List<Products>();
+            while (await rdr.ReadAsync())
+            {
+                list.Add(new Products
+                {
+                    Id = rdr.GetInt32(0),
+                    Name = rdr.GetString(1),
+                    Description = rdr.GetString(2),
+                    Price = rdr.GetDecimal(3),
+                    Color = rdr.IsDBNull(4) ? null : rdr.GetString(4),
+                    Size = rdr.IsDBNull(5) ? null : rdr.GetString(5),
+                    Quantity = rdr.GetInt32(6),
+                    Used = rdr.GetBoolean(7),
+                    BrandId = rdr.GetInt32(8),
+                    CategoryId = rdr.GetInt32(9),
+                    UserId = rdr.GetInt32(10),
+                    Image = rdr.IsDBNull(11) ? null : rdr.GetString(11)  // NEW
+                });
+            }
+
+            return list;
+        }
+
+        public async Task<Products?> GetProductByIdAsync(int id)
+        {
+            const string sql = @"
+        SELECT id,
+               name,
+               description,
+               price,
+               color,
+               size,
+               quantity,
+               used,
+               brand_id,
+               category_id,
+               user_id,
+               image
+          FROM products
+         WHERE id = @id;
+    ";
+
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("id", id);
+
+            using var rdr = await cmd.ExecuteReaderAsync();
+            if (!await rdr.ReadAsync())
+                return null;
+
+            return new Products
+            {
+                Id = rdr.GetInt32(0),
+                Name = rdr.GetString(1),
+                Description = rdr.GetString(2),
+                Price = rdr.GetDecimal(3),
+                Color = rdr.IsDBNull(4) ? null : rdr.GetString(4),
+                Size = rdr.IsDBNull(5) ? null : rdr.GetString(5),
+                Quantity = rdr.GetInt32(6),
+                Used = rdr.GetBoolean(7),
+                BrandId = rdr.GetInt32(8),
+                CategoryId = rdr.GetInt32(9),
+                UserId = rdr.GetInt32(10),
+                Image = rdr.IsDBNull(11) ? null : rdr.GetString(11)  // NEW
+            };
+        }
+
+
+        public async Task<bool> UpdateProductAsync(Products prod)
+        {
+            const string sql = @"
+        UPDATE products
+           SET name        = @name,
+               description = @desc,
+               price       = @price,
+               color       = @color,
+               size        = @size,
+               quantity    = @qty,
+               used        = @used,
+               brand_id    = @brand,
+               category_id = @cat
+         WHERE id = @id;
+    ";
+
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("name", prod.Name);
+            cmd.Parameters.AddWithValue("desc", prod.Description ?? "");
+            cmd.Parameters.AddWithValue("price", prod.Price);
+            cmd.Parameters.AddWithValue("color", (object?)prod.Color ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("size", (object?)prod.Size ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("qty", prod.Quantity);
+            cmd.Parameters.AddWithValue("used", prod.Used);
+            cmd.Parameters.AddWithValue("brand", prod.BrandId);
+            cmd.Parameters.AddWithValue("cat", prod.CategoryId);
+            cmd.Parameters.AddWithValue("id", prod.Id);
+
+            var rowsAffected = await cmd.ExecuteNonQueryAsync();
+            return rowsAffected == 1;
+        }
+
+
+
     }
+
 }

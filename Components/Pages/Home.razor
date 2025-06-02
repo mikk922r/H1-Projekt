@@ -1,5 +1,6 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+
 @using Projekt.Models
 @inject DBService DBService
 @inject CurrentUserService Auth
@@ -95,17 +96,83 @@
     }
 }
 
+@* --------------------------------------- *@
+@* Display all Products below *@
+@* --------------------------------------- *@
+
+@if (products is not null && products.Any())
+{
+    <h3 class="mt-5">All Products</h3>
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-2">
+        @foreach (var p in products)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    ▶ @* If an image exists, show it at the top of the card *@
+                    @if (!string.IsNullOrWhiteSpace(p.Image))
+                    {
+                        <img src="@p.Image"
+                             class="card-img-top"
+                             alt="Image of @p.Name"
+                             style="object-fit: cover; height: 200px;" />
+                    }
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@p.Name</h5>
+                        <p class="card-text flex-grow-1">
+                            @if (!string.IsNullOrWhiteSpace(p.Description))
+                            {
+                                @p.Description
+                            }
+                            else
+                            {
+                                <em>No description.</em>
+                            }
+                        </p>
+                        <p class="mb-2"><strong>Price:</strong> @string.Format("{0:C}", p.Price)</p>
+                        <p class="mb-2">
+                            <strong>Quantity:</strong> @p.Quantity
+                            @if (p.Used)
+                            {
+                                <span class="badge bg-secondary">Used</span>
+                            }
+                        </p>
+                        <button class="btn btn-outline-primary mt-auto"
+                                @onclick="() => ViewProductDetails(p.Id)">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else if (products is not null)
+{
+    <div class="alert alert-info text-center mt-5">
+        There are no products yet. Click “Add Product” above to create one!
+    </div>
+}
+
 @code {
     private List<Users>? users;
+    private List<Products>? products;
     private bool isConnected;
 
     protected override async Task OnInitializedAsync()
     {
         isConnected = await DBService.TestConnectionAsync();
+
+        // Load all products as soon as Home loads
+        products = await DBService.GetAllProductsAsync();
     }
 
     private async Task GetUsers()
     {
         users = await DBService.GetAllUsersAsync();
+    }
+
+    private void ViewProductDetails(int productId)
+    {
+        Nav.NavigateTo($"/product-details/{productId}");
     }
 }

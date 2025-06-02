@@ -1,8 +1,13 @@
 ﻿@page "/add-product"
 @rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components.Forms
+@using System.IO
+@using System
 @inject DBService DB
 @inject CurrentUserService Auth
 @inject NavigationManager Nav
+@inject IWebHostEnvironment Env
 
 <EditForm Model="product" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
@@ -68,6 +73,23 @@
         </InputSelect>
     </div>
 
+    <!-- ─────────── IMAGE UPLOAD SECTION ─────────── -->
+    <div class="mb-3">
+        <label class="form-label">Upload Image</label>
+        <InputFile OnChange="HandleFileSelected" accept="image/*" class="form-control" />
+        @if (!string.IsNullOrEmpty(imageUploadError))
+        {
+            <div class="text-danger mt-1">@imageUploadError</div>
+        }
+        @if (!string.IsNullOrEmpty(previewImageUrl))
+        {
+            <img src="@previewImageUrl"
+                 class="img-thumbnail mt-2"
+                 style="max-height: 200px; object-fit: contain;" />
+        }
+    </div>
+    <!-- ───────── END IMAGE UPLOAD SECTION ──────────── -->
+
     <button type="submit" class="btn btn-success">
         Create Product
     </button>
@@ -79,6 +101,12 @@
     private List<Category> categories = new();
     private List<Users> users = new();
     private bool _hasRedirected;
+
+    // ─── FIELDS FOR IMAGE UPLOAD ───
+    private IBrowserFile? selectedFile;
+    private string? imageUploadError;
+    private string? previewImageUrl;
+    // ────────────────────────────────
 
     protected override async Task OnInitializedAsync()
     {
@@ -101,9 +129,94 @@
         }
     }
 
+    // ─── Called when user picks a file in the <InputFile> control ───
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        imageUploadError = null;
+        previewImageUrl = null;
+        selectedFile = null;
+
+        var file = e.File;
+        if (file == null)
+        {
+            imageUploadError = "No file selected.";
+            return;
+        }
+        if (!file.ContentType.StartsWith("image/"))
+        {
+            imageUploadError = "Please select a valid image file.";
+            return;
+        }
+        if (file.Size > 2 * 1024 * 1024)
+        {
+            imageUploadError = "Image must be smaller than 2 MB.";
+            return;
+        }
+
+        selectedFile = file;
+
+        // Use an async read instead of synchronous Read(...)
+        try
+        {
+            // Open the stream (max 2 MB)
+            await using var stream = file.OpenReadStream(maxAllowedSize: 2 * 1024 * 1024);
+            var buffer = new byte[file.Size];
+            var read = 0;
+            while (read < buffer.Length)
+            {
+                var chunk = await stream.ReadAsync(buffer, read, buffer.Length - read);
+                if (chunk == 0) break;
+                read += chunk;
+            }
+
+            // Convert to base64 for preview
+            var base64 = Convert.ToBase64String(buffer);
+            previewImageUrl = $"data:{file.ContentType};base64,{base64}";
+        }
+        catch (Exception ex)
+        {
+            imageUploadError = $"Error reading image: {ex.Message}";
+        }
+    }
+
     private async Task HandleValidSubmit()
     {
-        var newId = await DB.AddProductAsync(product);
-        Nav.NavigateTo($"/product-details/{newId}");
+        // 1) If an image was selected, save it under wwwroot/uploads/
+        if (selectedFile != null)
+        {
+            try
+            {
+                // Ensure “uploads” folder exists under wwwroot
+                var uploadsFolder = Path.Combine(Env.WebRootPath, "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                // Generate a GUID-based filename
+                var ext = Path.GetExtension(selectedFile.Name);
+                var uniqueFileName = $"{Guid.NewGuid()}{ext}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                // Copy the uploaded file (max 2 MB) to “wwwroot/uploads/...”
+                await using var fs = new FileStream(filePath, FileMode.Create);
+                await selectedFile.OpenReadStream(maxAllowedSize: 2 * 1024 * 1024)
+                                   .CopyToAsync(fs);
+
+                // Store the relative URL in product.Image
+                // e.g. “uploads/3f50b9a2-… .jpg”
+                product.Image = Path.Combine("uploads", uniqueFileName)
+                                    .Replace("\\", "/");
+            }
+            catch (Exception ex)
+            {
+                imageUploadError = $"Error saving image: {ex.Message}";
+                return; // Abort if image‐save fails
+            }
+        }
+
+        // 2) Insert the product with its Image value (or null) into the DB
+        await DB.AddProductAsync(product);
+
+        // 3) Redirect to Home ("/")
+        Nav.NavigateTo("/");
     }
 }

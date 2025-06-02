@@ -1,0 +1,361 @@
+﻿@page "/product-details/{ProductId:int}"
+@rendermode InteractiveServer
+
+@using Projekt.Models
+@inject DBService DB
+@inject CurrentUserService Auth
+@inject NavigationManager Nav
+
+<div class="container py-4">
+
+    @if (isLoading)
+    {
+        <div class="text-center my-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2">Loading product details...</p>
+        </div>
+    }
+    else if (product is null)
+    {
+        <div class="alert alert-danger text-center">
+            <h4 class="alert-heading">Product Not Found</h4>
+            <p>There is no product with ID <strong>@ProductId</strong> in the database.</p>
+            <button class="btn btn-outline-secondary"
+                    @onclick="NavigateHome">
+                Back to Home
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="row mb-4">
+            <div class="col">
+                <h2>Product Details: <span class="text-primary">@product.Name</span></h2>
+                <p class="text-muted">Product ID: @product.Id</p>
+            </div>
+            <div class="col-auto">
+                @if (isOwner)
+                {
+                    <button class="btn btn-warning me-2"
+                            @onclick="ToggleEditMode">
+                        @if (editMode)
+                        {
+                            <span>Cancel Edit</span>
+                        }
+                        else
+                        {
+                            <span>Edit This Product</span>
+                        }
+                    </button>
+                }
+                <button class="btn btn-outline-secondary"
+                        @onclick="NavigateHome">
+                    Return to Home
+                </button>
+            </div>
+        </div>
+
+        @* ------------------------------------------- *@
+        @* READ-ONLY VIEW *@
+        @* ------------------------------------------- *@
+        @if (!editMode)
+        {
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">@product.Name</h5>
+
+                            ▶ @* Show the image if it exists *@
+                            @if (!string.IsNullOrWhiteSpace(product.Image))
+                            {
+                                <div class="text-center mb-3">
+                                    <img src="@product.Image"
+                                         alt="Image of @product.Name"
+                                         class="img-fluid rounded"
+                                         style="max-height: 300px; object-fit: contain;" />
+                                </div>
+                            }
+
+                            <p class="card-text"><strong>Description:</strong></p>
+                            <p>
+                                @(string.IsNullOrWhiteSpace(product.Description) ?
+                                    (MarkupString)"<em>No description provided.</em>" :
+                                    product.Description)
+                            </p>
+                            <hr />
+                            <p><strong>Price:</strong> @string.Format("{0:C}", product.Price)</p>
+                            <p><strong>Color:</strong> @(string.IsNullOrWhiteSpace(product.Color) ? "—" : product.Color)</p>
+                            <p><strong>Size:</strong> @(string.IsNullOrWhiteSpace(product.Size) ? "—" : product.Size)</p>
+                            <p>
+                                <strong>Quantity:</strong> @product.Quantity
+                                @if (product.Used)
+                                {
+                                    <span class="badge bg-secondary ms-2">Used</span>
+                                }
+                            </p>
+                            <hr />
+                            <p><strong>Brand ID:</strong> @product.BrandId</p>
+                            <p><strong>Category ID:</strong> @product.CategoryId</p>
+                            <p><strong>Seller (User ID):</strong> @product.UserId</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Additional Info</h5>
+                            <p class="card-text">Use this space to show logs, analytics, or related reviews.</p>
+                            <p class="text-muted small">[e.g. related items, user feedback, etc.]</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @* ------------------------------------------- *@
+        @* EDIT FORM *@
+        @* ------------------------------------------- *@
+        @if (editMode && isOwner)
+        {
+            <div class="card mt-4 shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Edit Product</h4>
+                    <EditForm Model="editProduct" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Name</label>
+                                <InputText class="form-control" @bind-Value="editProduct.Name" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Price</label>
+                                <InputNumber class="form-control" @bind-Value="editProduct.Price" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <InputTextArea class="form-control" rows="3" @bind-Value="editProduct.Description" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Color</label>
+                                <InputText class="form-control" @bind-Value="editProduct.Color" />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Size</label>
+                                <InputText class="form-control" @bind-Value="editProduct.Size" />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Quantity</label>
+                                <InputNumber class="form-control" @bind-Value="editProduct.Quantity" />
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <InputCheckbox class="form-check-input" @bind-Value="editProduct.Used" />
+                            <label class="form-check-label">Used?</label>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Brand</label>
+                                <InputSelect class="form-select" @bind-Value="editProduct.BrandId">
+                                    <option value="">-- select brand --</option>
+                                    @foreach (var b in brands)
+                                    {
+                                        <option value="@b.Id">@b.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Category</label>
+                                <InputSelect class="form-select" @bind-Value="editProduct.CategoryId">
+                                    <option value="">-- select category --</option>
+                                    @foreach (var c in categories)
+                                    {
+                                        <option value="@c.Id">@c.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary me-2">Save Changes</button>
+                            <button type="button" class="btn btn-outline-secondary" @onclick="CancelEdit">
+                                Cancel
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        }
+
+        @* ------------------------------------------- *@
+        @* SAVE Outcome Alerts *@
+        @* ------------------------------------------- *@
+        @if (saveSuccess)
+        {
+            <div class="alert alert-success mt-4" role="alert">
+                <strong>Success!</strong> Product was updated.
+            </div>
+        }
+        @if (saveFailure)
+        {
+            <div class="alert alert-danger mt-4" role="alert">
+                <strong>Oops!</strong> Something went wrong. Please try again.
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int ProductId { get; set; }
+
+    private Products? product;
+    private Products editProduct = new();
+    private bool isOwner = false;
+    private bool editMode = false;
+    private bool isLoading = true;
+
+    private bool saveSuccess = false;
+    private bool saveFailure = false;
+
+    private List<Brand> brands = new();
+    private List<Category> categories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load the product
+        product = await DB.GetProductByIdAsync(ProductId);
+        if (product is null)
+        {
+            isLoading = false;
+            return;
+        }
+
+        // Determine ownership
+        if (Auth.IsAuthenticated && Auth.CurrentUser != null)
+        {
+            isOwner = product.UserId == Auth.CurrentUser.Id;
+        }
+
+        // Copy into editProduct
+        editProduct = new Products
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Color = product.Color,
+                Size = product.Size,
+                Quantity = product.Quantity,
+                Used = product.Used,
+                BrandId = product.BrandId,
+                CategoryId = product.CategoryId,
+                UserId = product.UserId,
+                Image = product.Image   
+        };
+
+        // Load dropdown data
+        brands = await DB.GetAllBrandsAsync();
+        categories = await DB.GetAllCategoriesAsync();
+
+        isLoading = false;
+    }
+
+    private void ToggleEditMode()
+    {
+        saveSuccess = false;
+        saveFailure = false;
+        editMode = !editMode;
+
+        if (editMode && product != null)
+        {
+            editProduct = new Products
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Description = product.Description,
+                    Price = product.Price,
+                    Color = product.Color,
+                    Size = product.Size,
+                    Quantity = product.Quantity,
+                    Used = product.Used,
+                    BrandId = product.BrandId,
+                    CategoryId = product.CategoryId,
+                    UserId = product.UserId,
+                    Image = product.Image  
+            };
+        }
+    }
+
+    private void CancelEdit()
+    {
+        if (product != null)
+        {
+            editProduct = new Products
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Description = product.Description,
+                    Price = product.Price,
+                    Color = product.Color,
+                    Size = product.Size,
+                    Quantity = product.Quantity,
+                    Used = product.Used,
+                    BrandId = product.BrandId,
+                    CategoryId = product.CategoryId,
+                    UserId = product.UserId,
+                    Image = product.Image   
+            };
+        }
+        saveSuccess = false;
+        saveFailure = false;
+        editMode = false;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        saveSuccess = false;
+        saveFailure = false;
+
+        // Push changes (image remains unchanged unless you implement image‐update)
+        var ok = await DB.UpdateProductAsync(editProduct);
+        if (ok)
+        {
+            product = new Products
+                {
+                    Id = editProduct.Id,
+                    Name = editProduct.Name,
+                    Description = editProduct.Description,
+                    Price = editProduct.Price,
+                    Color = editProduct.Color,
+                    Size = editProduct.Size,
+                    Quantity = editProduct.Quantity,
+                    Used = editProduct.Used,
+                    BrandId = editProduct.BrandId,
+                    CategoryId = editProduct.CategoryId,
+                    UserId = editProduct.UserId,
+                    Image = editProduct.Image
+                };
+            saveSuccess = true;
+            editMode = false;
+        }
+        else
+        {
+            saveFailure = true;
+        }
+    }
+
+    private void NavigateHome()
+    {
+        Nav.NavigateTo("/");
+    }
+}
