@@ -1,4 +1,6 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
+@inject CurrentUserService Auth
 
 <Header />
 
@@ -7,3 +9,22 @@
 </main>
 
 <Footer />
+
+@code {
+    protected override void OnInitialized()
+    {
+        Auth.CurrentUserHasChanged += OnCurrentUserChanged;
+    }
+
+    private void OnCurrentUserChanged(object? sender, User? user)
+    {
+        // Request a UI refresh when the current user changes
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe to prevent memory leaks
+        Auth.CurrentUserHasChanged -= OnCurrentUserChanged;
+    }
+}

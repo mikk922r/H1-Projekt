@@ -1,4 +1,5 @@
-﻿@inject CurrentUserService Auth
+﻿@rendermode InteractiveServer
+@inject CurrentUserService Auth
 @inject NavigationManager Nav
 
 <nav class="d-flex z-3 w-100 h-auto align-items-center justify-content-center position-sticky">
@@ -15,13 +16,55 @@
                 Tøjmarkedsplads
             </a>
         </div>
+
+
+
+
+
+        <div class="flex-grow-1">
+            @if (Auth.IsAuthenticated)
+            {
+                <button type="button" class="d-flex align-items-center justify-content-center rounded-circle border border-0 bg-transparent p-0" data-bs-toggle="dropdown" aria-expanded="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--lucide" data-locator="src/App.tsx:Icon:86:18" width="20" height="20" viewBox="0 0 24 24">
+                        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </g>
+                    </svg>
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li class="d-flex gap-3">
+                        <div class="d-flex flex-column gap-2">
+                            <span>@Auth.CurrentUser!.Name</span>
+                            <span>Gå til profil</span>
+                        </div>
+                    </li>
+                    <li><button class="dropdown-item" type="button">Another action</button></li>
+                    <li><button class="dropdown-item" type="button">Something else here</button></li>
+                </ul>
+            } else {
+                <a href="/login" class="btn btn-primary">Log ind</a>
+            }
+        </div>
     </header>
 </nav>
 
 @code {
-    private void Logout()
+    protected override void OnInitialized()
     {
-        Auth.SignOut();
-        Nav.NavigateTo("/");
+        base.OnInitialized();
+
+        Auth.CurrentUserHasChanged += OnCurrentUserChanged;
+    }
+
+    private void OnCurrentUserChanged(object? sender, User? user)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Auth.CurrentUserHasChanged -= OnCurrentUserChanged;
     }
 }

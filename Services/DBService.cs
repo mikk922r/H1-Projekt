@@ -26,17 +26,17 @@ namespace Projekt.Services
             }
         }
 
-        public async Task<List<Users>> GetAllUsersAsync()
+        public async Task<List<User>> GetAllUsersAsync()
         {
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
             using var cmd = new NpgsqlCommand("SELECT id, name, email, phone_code, phone_number FROM users ORDER BY name", conn);
             using var rdr = await cmd.ExecuteReaderAsync();
 
-            var list = new List<Users>();
+            var list = new List<User>();
             while (await rdr.ReadAsync())
             {
-                list.Add(new Users
+                list.Add(new User
                 {
                     Id = rdr.GetInt32(0),
                     Name = rdr.GetString(1),
@@ -48,7 +48,7 @@ namespace Projekt.Services
             return list;
         }
 
-        public async Task<Users?> GetUserByEmailAsync(string email)
+        public async Task<User?> GetUserByEmailAsync(string email)
         {
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
@@ -58,7 +58,7 @@ namespace Projekt.Services
             using var rdr = await cmd.ExecuteReaderAsync();
             if (!await rdr.ReadAsync()) return null;
 
-            return new Users
+            return new User
             {
                 Id = rdr.GetInt32(0),
                 Name = rdr.GetString(1),
@@ -68,7 +68,7 @@ namespace Projekt.Services
             };
         }
 
-        public async Task<int> AddUserAsync(Users user)
+        public async Task<int> AddUserAsync(User user)
         {
             const string sql = @"
                 INSERT INTO users (name, email, phone_code, phone_number)

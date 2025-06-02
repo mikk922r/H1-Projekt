@@ -13,3 +13,14 @@
             font-size: 1.125rem;
             line-height: 1.75rem;
         }
+
+button[data-bs-toggle] {
+    transition: background-color .2s ease-in-out;
+    height: 2.5rem;
+    width: 2.5rem;
+}
+
+    button[data-bs-toggle].show,
+    button[data-bs-toggle]:hover {
+        background-color: rgba(17, 17, 17, 0.1) !important;
+    }

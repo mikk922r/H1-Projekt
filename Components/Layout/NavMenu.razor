@@ -1,4 +1,7 @@
-﻿<div class="list-group">
+﻿@inject CurrentUserService Auth
+@inject NavigationManager Nav
+
+<div class="list-group">
     <NavLink href="/" class="list-group-item list-group-item-action">Home</NavLink>
     <NavLink href="/add-product" class="list-group-item list-group-item-action">Add Product</NavLink>
     @if (Auth.IsAuthenticated)
@@ -13,9 +16,6 @@
 </div>
 
 @code {
-    [Inject] CurrentUserService Auth { get; set; }
-    [Inject] NavigationManager Nav { get; set; }
-
     private void Logout()
     {
         Auth.SignOut();
