@@ -1,9 +1,9 @@
 ﻿@page "/product-details/{ProductId:int}"
 @rendermode InteractiveServer
+@inherits BasePage
 
 @using Projekt.Models
 @inject DBService DB
-@inject CurrentUserService Auth
 @inject NavigationManager Nav
 
 <div class="container py-4">

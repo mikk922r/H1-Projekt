@@ -1,11 +1,11 @@
 ﻿@page "/add-product"
 @rendermode InteractiveServer
+@inherits BasePage
 
 @using Microsoft.AspNetCore.Components.Forms
 @using System.IO
 @using System
 @inject DBService DB
-@inject CurrentUserService Auth
 @inject NavigationManager Nav
 @inject IWebHostEnvironment Env
 

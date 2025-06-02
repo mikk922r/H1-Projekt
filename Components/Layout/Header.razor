@@ -1,10 +1,11 @@
 ﻿@rendermode InteractiveServer
-@inject CurrentUserService Auth
+@inherits BasePage
+@inject DBService DBService
 @inject NavigationManager Nav
 
 <nav class="d-flex z-3 w-100 h-auto align-items-center justify-content-center position-sticky">
-    <header class="d-flex px-4 gap-3">
-        <div class="flex-grow-1">
+    <header class="d-flex justify-space-between align-items-center px-4 gap-3 w-100">
+        <div class="d-flex justify-content-start flex-grow-1">
             <a href="/" class="d-flex align-items-center gap-2 link-dark link-underline-opacity-0 fw-semibold">
                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--lucide" data-locator="src/App.tsx:Icon:19:12" width="24" height="24" viewBox="0 0 24 24">
                     <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
@@ -18,53 +19,51 @@
         </div>
 
 
+        <ul>
+
+        </ul>
 
 
-
-        <div class="flex-grow-1">
+        <div class="d-flex justify-content-end flex-grow-1">
             @if (Auth.IsAuthenticated)
             {
-                <button type="button" class="d-flex align-items-center justify-content-center rounded-circle border border-0 bg-transparent p-0" data-bs-toggle="dropdown" aria-expanded="false">
+                <button type="button" class="d-flex align-items-center justify-content-center rounded-2 border border-0 bg-transparent py-0 px-2 gap-2" data-bs-toggle="dropdown" aria-expanded="false">
                     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--lucide" data-locator="src/App.tsx:Icon:86:18" width="20" height="20" viewBox="0 0 24 24">
                         <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
                             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </g>
                     </svg>
+
+                    <span>@Auth.CurrentUser!.Name</span>
                 </button>
 
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li class="d-flex gap-3">
-                        <div class="d-flex flex-column gap-2">
-                            <span>@Auth.CurrentUser!.Name</span>
-                            <span>Gå til profil</span>
-                        </div>
-                    </li>
-                    <li><button class="dropdown-item" type="button">Another action</button></li>
-                    <li><button class="dropdown-item" type="button">Something else here</button></li>
+                    <li><a href="/account" class="dropdown-item">Min konto</a></li>
+                    <li><a href="/orders" class="dropdown-item">Mine ordrer</a></li>
+                    <li><button class="dropdown-item danger" @onclick="LogOut">Log ud</button></li>
                 </ul>
             } else {
                 <a href="/login" class="btn btn-primary">Log ind</a>
             }
         </div>
     </header>
+
+    <span class="badge d-block rounded-circle position-fixed m-2 @(isConnected ? "bg-success" : "bg-danger")"></span>
 </nav>
 
 @code {
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
+    private bool isConnected = false;
 
-        Auth.CurrentUserHasChanged += OnCurrentUserChanged;
+    protected override async Task OnInitializedAsync()
+    {
+        isConnected = await DBService.TestConnectionAsync();
     }
 
-    private void OnCurrentUserChanged(object? sender, User? user)
+    private void LogOut()
     {
-        InvokeAsync(StateHasChanged);
-    }
+        Auth.SignOut();
 
-    public void Dispose()
-    {
-        Auth.CurrentUserHasChanged -= OnCurrentUserChanged;
+        Nav.NavigateTo("/");
     }
 }

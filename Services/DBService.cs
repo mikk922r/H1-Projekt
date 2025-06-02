@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Npgsql;
+﻿using Npgsql;
 using Projekt.Models;
 
 namespace Projekt.Services

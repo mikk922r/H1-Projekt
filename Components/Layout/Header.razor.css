@@ -7,6 +7,8 @@
 }
 
     nav header {
+        max-width: 1280px;
+        height: 4rem;
     }
 
         nav header > div > a {
@@ -17,10 +19,16 @@
 button[data-bs-toggle] {
     transition: background-color .2s ease-in-out;
     height: 2.5rem;
-    width: 2.5rem;
 }
 
     button[data-bs-toggle].show,
     button[data-bs-toggle]:hover {
         background-color: rgba(17, 17, 17, 0.1) !important;
     }
+
+.badge {
+    height: 1rem;
+    width: 1rem;
+    right: 0;
+    top: 0;
+}

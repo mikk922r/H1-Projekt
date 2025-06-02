@@ -1,8 +1,9 @@
 ﻿@page "/register"
 @rendermode InteractiveServer
+@inherits BasePage
+
 @using System.ComponentModel.DataAnnotations
 @inject DBService DB
-@inject CurrentUserService Auth
 @inject NavigationManager Nav
 
 <EditForm Model="newUser" OnValidSubmit="HandleRegister">
