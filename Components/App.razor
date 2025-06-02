@@ -19,6 +19,11 @@
     <Routes />
     <script src="_framework/blazor.web.js"></script>
     <script>
+        document.getElementById('sidebarToggle').addEventListener('click', function () {
+          document.getElementById('wrapper').classList.toggle('toggled');
+        });
+    </script>
+    <script>
         window.updateInputValueById = function (id, value) {
             const input = document.getElementById(id);
 

@@ -1,0 +1,64 @@
+﻿@page "/register"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@inject DBService DB
+@inject CurrentUserService Auth
+@inject NavigationManager Nav
+
+<EditForm Model="newUser" OnValidSubmit="HandleRegister">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <InputText class="form-control" @bind-Value="newUser.Name" />
+        <ValidationMessage For="@(() => newUser.Name)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <InputText class="form-control" @bind-Value="newUser.Email" />
+        <ValidationMessage For="@(() => newUser.Email)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Phone Code</label>
+        <InputNumber class="form-control" @bind-Value="newUser.PhoneCode" />
+        <ValidationMessage For="@(() => newUser.PhoneCode)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Phone Number</label>
+        <InputText class="form-control" @bind-Value="newUser.PhoneNumber" />
+        <ValidationMessage For="@(() => newUser.PhoneNumber)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="alert alert-danger mt-2">@error</div>
+}
+
+@code {
+    private Users newUser = new();
+    private string? error;
+
+    private async Task HandleRegister()
+    {
+        try
+        {
+            var newId = await DB.AddUserAsync(newUser);
+            newUser.Id = newId;
+
+            Auth.SignIn(newUser);
+            Nav.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            error = "Registration failed. Please try again.";
+            Console.Error.WriteLine($"Register failed: {ex.Message}");
+        }
+    }
+}

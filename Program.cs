@@ -1,37 +1,43 @@
 using Projekt.Components;
 using Projekt.Services;
-namespace Projekt
-{
-    public class Program
+using Microsoft.AspNetCore.Authentication.Cookies;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// 1) Add Blazor Server–style components:
+builder.Services
+    .AddRazorComponents()    
+    .AddInteractiveServerComponents();
+
+// 2) Your scoped services:
+builder.Services.AddScoped<DBService>();
+builder.Services.AddScoped<CurrentUserService>();
+
+// 3) Cookie-based auth:
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
     {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+        options.LoginPath = "/login";
+        options.LogoutPath = "/logout";
+    });
 
-            // Add services to the container.
-            builder.Services.AddRazorComponents()
-                .AddInteractiveServerComponents();
+// 4) Build the app:
+var app = builder.Build();
 
-            builder.Services.AddScoped<DBService>();
-            var app = builder.Build();
-            
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+// 5) Middleware pipeline in exact order:
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
 
-            app.UseHttpsRedirection();
+// ?? Authentication + Authorization come before antiforgery
+app.UseAuthentication();
+app.UseAuthorization();
 
-            app.UseAntiforgery();
+// ?? Now register the antiforgery middleware
+app.UseAntiforgery();
 
-            app.MapStaticAssets();
-            app.MapRazorComponents<App>()
-                .AddInteractiveServerRenderMode();
+// 6) Map your Blazor components (no _Host page needed)
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
 
-            app.Run();
-        } 
-    }
-}
+app.Run();

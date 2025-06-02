@@ -7,12 +7,11 @@ namespace Projekt.Services
     public partial class DBService
     {
         private readonly string _connectionString;
-
         public DBService(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection")!;
-    
         }
+
         public async Task<bool> TestConnectionAsync()
         {
             try
@@ -27,35 +26,129 @@ namespace Projekt.Services
             }
         }
 
-        // Get All Users
         public async Task<List<Users>> GetAllUsersAsync()
         {
-            using (var connection = new NpgsqlConnection(_connectionString))
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+            using var cmd = new NpgsqlCommand("SELECT id, name, email, phone_code, phone_number FROM users ORDER BY name", conn);
+            using var rdr = await cmd.ExecuteReaderAsync();
+
+            var list = new List<Users>();
+            while (await rdr.ReadAsync())
             {
-                await connection.OpenAsync();
-
-                using (var command = new NpgsqlCommand("SELECT * FROM users", connection))
-                using (var reader = await command.ExecuteReaderAsync())
+                list.Add(new Users
                 {
-                    var users = new List<Users>();
-
-                    while (await reader.ReadAsync())
-                    {
-                        users.Add(
-                          new Users
-                          {
-                              Id = reader.GetInt32(reader.GetOrdinal("id")),
-                              Name = reader.GetString(reader.GetOrdinal("name")),
-                              Email = reader.GetString(reader.GetOrdinal("email")),
-                              PhoneCode = reader.GetInt32(reader.GetOrdinal("phone_code")),
-                              PhoneNumber = reader.GetString(reader.GetOrdinal("phone_number")),
-                          }
-                      );
-                    }
-
-                    return users;
-                }
+                    Id = rdr.GetInt32(0),
+                    Name = rdr.GetString(1),
+                    Email = rdr.GetString(2),
+                    PhoneCode = rdr.GetInt32(3),
+                    PhoneNumber = rdr.GetString(4)
+                });
             }
+            return list;
+        }
+
+        public async Task<Users?> GetUserByEmailAsync(string email)
+        {
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+            using var cmd = new NpgsqlCommand(
+                "SELECT id, name, email, phone_code, phone_number FROM users WHERE email=@e", conn);
+            cmd.Parameters.AddWithValue("e", email);
+            using var rdr = await cmd.ExecuteReaderAsync();
+            if (!await rdr.ReadAsync()) return null;
+
+            return new Users
+            {
+                Id = rdr.GetInt32(0),
+                Name = rdr.GetString(1),
+                Email = rdr.GetString(2),
+                PhoneCode = rdr.GetInt32(3),
+                PhoneNumber = rdr.GetString(4)
+            };
+        }
+
+        public async Task<int> AddUserAsync(Users user)
+        {
+            const string sql = @"
+                INSERT INTO users (name, email, phone_code, phone_number)
+                VALUES (@name, @email, @code, @phone)
+                RETURNING id;";
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("name", user.Name);
+            cmd.Parameters.AddWithValue("email", user.Email);
+            cmd.Parameters.AddWithValue("code", user.PhoneCode);
+            cmd.Parameters.AddWithValue("phone", user.PhoneNumber);
+            return (int)await cmd.ExecuteScalarAsync();
+        }
+
+        public async Task<List<Brands>> GetAllBrandsAsync()
+        {
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+            using var cmd = new NpgsqlCommand("SELECT id, name FROM brands ORDER BY name", conn);
+            using var rdr = await cmd.ExecuteReaderAsync();
+
+            var list = new List<Brands>();
+            while (await rdr.ReadAsync())
+            {
+                list.Add(new Brands
+                {
+                    Id = rdr.GetInt32(0),
+                    Name = rdr.GetString(1)
+                });
+            }
+            return list;
+        }
+
+        public async Task<List<Categories>> GetAllCategoriesAsync()
+        {
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+            using var cmd = new NpgsqlCommand("SELECT id, name, parent_category_id FROM categories ORDER BY name", conn);
+            using var rdr = await cmd.ExecuteReaderAsync();
+
+            var list = new List<Categories>();
+            while (await rdr.ReadAsync())
+            {
+                list.Add(new Categories
+                {
+                    Id = rdr.GetInt32(0),
+                    Name = rdr.GetString(1),
+                });
+            }
+            return list;
+        }
+
+        public async Task<int> AddProductAsync(Products prod)
+        {
+            const string sql = @"
+                INSERT INTO products
+                  (name, description, price, color, size, quantity, used,
+                   brand_id, category_id, user_id)
+                VALUES
+                  (@name, @desc, @price, @color, @size, @qty, @used,
+                   @brand, @cat, @user)
+                RETURNING id;
+            ";
+
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("name", prod.Name);
+            cmd.Parameters.AddWithValue("desc", prod.Description);
+            cmd.Parameters.AddWithValue("price", prod.Price);
+            cmd.Parameters.AddWithValue("color", (object?)prod.Color ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("size", (object?)prod.Size ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("qty", prod.Quantity);
+            cmd.Parameters.AddWithValue("used", prod.Used);
+            cmd.Parameters.AddWithValue("brand", prod.BrandId);
+            cmd.Parameters.AddWithValue("cat", prod.CategoryId);
+            cmd.Parameters.AddWithValue("user", prod.UserId);
+
+            return (int)await cmd.ExecuteScalarAsync();
         }
     }
 }

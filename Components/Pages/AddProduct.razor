@@ -1,0 +1,109 @@
+﻿@page "/add-product"
+@rendermode InteractiveServer
+@inject DBService DB
+@inject CurrentUserService Auth
+@inject NavigationManager Nav
+
+<EditForm Model="product" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <InputText class="form-control" @bind-Value="product.Name" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <InputTextArea class="form-control" @bind-Value="product.Description" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Price</label>
+        <InputNumber class="form-control" @bind-Value="product.Price" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Color</label>
+        <InputText class="form-control" @bind-Value="product.Color" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Size</label>
+        <InputText class="form-control" @bind-Value="product.Size" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Quantity</label>
+        <InputNumber class="form-control" @bind-Value="product.Quantity" />
+    </div>
+    <div class="form-check mb-3">
+        <InputCheckbox class="form-check-input" @bind-Value="product.Used" />
+        <label class="form-check-label">Used?</label>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Brand</label>
+        <InputSelect class="form-select" @bind-Value="product.BrandId">
+            <option value="">-- select brand --</option>
+            @foreach (var b in brands)
+            {
+                <option value="@b.Id">@b.Name</option>
+            }
+        </InputSelect>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Category</label>
+        <InputSelect class="form-select" @bind-Value="product.CategoryId">
+            <option value="">-- select category --</option>
+            @foreach (var c in categories)
+            {
+                <option value="@c.Id">@c.Name</option>
+            }
+        </InputSelect>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Seller</label>
+        <InputSelect class="form-select" @bind-Value="product.UserId" disabled="!Auth.IsAuthenticated">
+            <option value="">-- select user --</option>
+            @foreach (var u in users)
+            {
+                <option value="@u.Id">@u.Name</option>
+            }
+        </InputSelect>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        Create Product
+    </button>
+</EditForm>
+
+@code {
+    private Products product = new();
+    private List<Brands> brands = new();
+    private List<Categories> categories = new();
+    private List<Users> users = new();
+    private bool _hasRedirected;
+
+    protected override async Task OnInitializedAsync()
+    {
+        brands = await DB.GetAllBrandsAsync();
+        categories = await DB.GetAllCategoriesAsync();
+        users = await DB.GetAllUsersAsync();
+
+        if (Auth.IsAuthenticated)
+        {
+            product.UserId = Auth.CurrentUser!.Id;
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender && !_hasRedirected && !Auth.IsAuthenticated)
+        {
+            _hasRedirected = true;
+            Nav.NavigateTo("/login");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var newId = await DB.AddProductAsync(product);
+        Nav.NavigateTo($"/product-details/{newId}");
+    }
+}

@@ -73,3 +73,15 @@ h1, h2, h3, h4, h5, h6 {
     font-size: inherit;
     font-weight: inherit;
 }
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: -250px;
+}
+
+#sidebar-wrapper {
+    width: 250px;
+    transition: margin 0.25s ease-out;
+}
+
+#page-content-wrapper {
+    flex: 1;
+}

@@ -29,6 +29,5 @@ namespace Projekt.Models
 
         public int UserId { get; set; }
 
-        public string? ImagePath { get; set; }
     }
 }

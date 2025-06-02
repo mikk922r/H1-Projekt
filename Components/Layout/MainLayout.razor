@@ -1,25 +1,59 @@
 ﻿@inherits LayoutComponentBase
+@inject CurrentUserService Auth
+@inject NavigationManager Nav
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar-->
+    <div class="border-end bg-white" id="sidebar-wrapper">
+        <div class="sidebar-heading border-bottom bg-light text-center py-3">
+            <strong>Marketplace</strong>
         </div>
-
-        <article class="content px-4">
+        <div class="list-group list-group-flush">
+            <NavLink href="/" class="list-group-item list-group-item-action">Home</NavLink>
+            <NavLink href="/add-product" class="list-group-item list-group-item-action">Add Product</NavLink>
+            @if (Auth.IsAuthenticated)
+            {
+                <NavLink href="#" class="list-group-item list-group-item-action" @onclick="Logout">Logout</NavLink>
+            }
+            else
+            {
+                <NavLink href="/login" class="list-group-item list-group-item-action">Login</NavLink>
+                <NavLink href="/register" class="list-group-item list-group-item-action">Register</NavLink>
+            }
+        </div>
+    </div>
+    <!-- Page content wrapper-->
+    <div id="page-content-wrapper">
+        <!-- Top navigation-->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+            <div class="container-fluid">
+                <button class="btn btn-outline-primary" id="sidebarToggle">☰</button>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="topbarNav">
+                    <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                        @if (Auth.IsAuthenticated)
+                        {
+                            <li class="nav-item px-2">
+                                <span class="navbar-text">Hello, @Auth.CurrentUser.Name!</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Main content-->
+        <div class="container-fluid px-4 py-4">
             @Body
-        </article>
-    </main>
+        </div>
+    </div>
 </div>
 
-<Footer />
-
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
+@code {
+    private void Logout()
+    {
+        Auth.SignOut();
+        Nav.NavigateTo("/");
+    }
+}
