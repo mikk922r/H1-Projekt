@@ -20,8 +20,7 @@
         <div class="alert alert-danger text-center">
             <h4 class="alert-heading">Produkt ikke fundet</h4>
             <p>Der findes ikke noget produkt med ID <strong>@ProductId</strong> i databasen.</p>
-            <button class="btn btn-outline-secondary"
-                    @onclick="NavigateHome">
+            <button class="btn btn-outline-secondary" @onclick="NavigateHome">
                 Tilbage til forsiden
             </button>
         </div>
@@ -36,8 +35,7 @@
             <div class="col-auto">
                 @if (isOwner)
                 {
-                    <button class="btn btn-warning me-2"
-                            @onclick="ToggleEditMode">
+                    <button class="btn btn-warning me-2" @onclick="ToggleEditMode">
                         @if (editMode)
                         {
                             <span>Annullér redigering</span>
@@ -48,8 +46,7 @@
                         }
                     </button>
                 }
-                <button class="btn btn-outline-secondary"
-                        @onclick="NavigateHome">
+                <button class="btn btn-outline-secondary" @onclick="NavigateHome">
                     Tilbage
                 </button>
             </div>
@@ -79,14 +76,20 @@
 
                             <p class="card-text"><strong>Beskrivelse:</strong></p>
                             <p>
-                                @(string.IsNullOrWhiteSpace(product.Description) ?
-                                    (MarkupString)"<em>Ingen beskrivelse er angivet.</em>" :
-                                    product.Description)
+                                @(string.IsNullOrWhiteSpace(product.Description)
+                                    ? (MarkupString)"<em>Ingen beskrivelse er angivet.</em>"
+                                    : product.Description)
                             </p>
                             <hr />
                             <p><strong>Pris:</strong> @string.Format("{0:C}", product.Price)</p>
-                            <p><strong>Farve:</strong> @(string.IsNullOrWhiteSpace(product.Color) ? "—" : product.Color)</p>
-                            <p><strong>Størrelse:</strong> @(string.IsNullOrWhiteSpace(product.Size) ? "—" : product.Size)</p>
+                            <p>
+                                <strong>Farve:</strong>
+                                @(string.IsNullOrWhiteSpace(product.Color) ? "—" : product.Color)
+                            </p>
+                            <p>
+                                <strong>Størrelse:</strong>
+                                @(string.IsNullOrWhiteSpace(product.Size) ? "—" : product.Size)
+                            </p>
                             <p>
                                 <strong>Antal:</strong> @product.Quantity
                                 @if (product.Used)
@@ -95,9 +98,12 @@
                                 }
                             </p>
                             <hr />
-                            <p><strong>Mærke-ID:</strong> @product.BrandId</p>
-                            <p><strong>Kategori-ID:</strong> @product.CategoryId</p>
-                            <p><strong>Sælger (Bruger-ID):</strong> @product.UserId</p>
+                            <p><strong>Mærke:</strong> @product.BrandName</p>
+                            <p><strong>Kategori:</strong> @product.CategoryName</p>
+                            <p>
+                                <strong>Sælger:</strong>
+                                @(string.IsNullOrWhiteSpace(product.UserName) ? "—" : product.UserName)
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -106,7 +112,9 @@
                     <div class="card shadow-sm">
                         <div class="card-body">
                             <h5 class="card-title">Yderligere info</h5>
-                            <p class="card-text">Her kan du vise logs, analyser eller kundeanmeldelser.</p>
+                            <p class="card-text">
+                                Her kan du vise logs, analyser eller kundeanmeldelser.
+                            </p>
                             <p class="text-muted small">[f.eks. relaterede varer, brugerfeedback osv.]</p>
                         </div>
                     </div>
@@ -227,12 +235,12 @@
     private bool saveSuccess = false;
     private bool saveFailure = false;
 
-    private List<Brand> brands = new();
-    private List<Category> categories = new();
+    private List<Brand> categories = new();
+    private List<Category> brands = new();
 
     protected override async Task OnInitializedAsync()
     {
-        // Indlæs produktet
+        // Indlæs produktet inkl. brand/category/user-navne
         product = await DB.GetProductByIdAsync(ProductId);
         if (product is null)
         {
@@ -243,7 +251,7 @@
         // Tjek ejerskab
         if (Auth.IsAuthenticated && Auth.CurrentUser != null)
         {
-            isOwner = product.UserId == Auth.CurrentUser.Id;
+            isOwner = (product.UserId == Auth.CurrentUser.Id);
         }
 
         // Kopiér til editProduct
@@ -264,8 +272,8 @@
             };
 
         // Indlæs dropdown-data
-        brands = await DB.GetAllBrandsAsync();
-        categories = await DB.GetAllCategoriesAsync();
+        categories = await DB.GetAllBrandsAsync();
+        brands = await DB.GetAllCategoriesAsync();
 
         isLoading = false;
     }
@@ -326,10 +334,11 @@
         saveSuccess = false;
         saveFailure = false;
 
-        // Gem ændringer (billedet forbliver uændret, medmindre billede-opdatering implementeres)
+        // Gem ændringer (billedet forbliver uændret)
         var ok = await DB.UpdateProductAsync(editProduct);
         if (ok)
         {
+            // Efter en succesfuld update, bevarer vi de samme joined‐navne
             product = new Products
                 {
                     Id = editProduct.Id,
@@ -343,8 +352,12 @@
                     BrandId = editProduct.BrandId,
                     CategoryId = editProduct.CategoryId,
                     UserId = editProduct.UserId,
-                    Image = editProduct.Image
+                    Image = editProduct.Image,
+                    BrandName = product.BrandName,
+                    CategoryName = product.CategoryName,
+                    UserName = product.UserName
                 };
+
             saveSuccess = true;
             editMode = false;
         }

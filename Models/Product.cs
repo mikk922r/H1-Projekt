@@ -31,5 +31,9 @@ namespace Projekt.Models
 
         public string? Image { get; set; }
 
+        public string BrandName { get; set; } = default!;
+        public string CategoryName { get; set; } = default!;
+        public string? UserName { get; set; }
+
     }
 }
