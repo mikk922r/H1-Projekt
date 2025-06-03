@@ -104,20 +104,26 @@ namespace Projekt.Services
 
         public async Task<List<Category>> GetAllCategoriesAsync()
         {
-            await using var conn = new NpgsqlConnection(_connectionString);
-            await conn.OpenAsync();
-            using var cmd = new NpgsqlCommand("SELECT id, name, parent_category_id FROM categories ORDER BY name", conn);
-            using var rdr = await cmd.ExecuteReaderAsync();
+            await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
 
-            var list = new List<Category>();
-            while (await rdr.ReadAsync())
+            await conn.OpenAsync();
+
+            using NpgsqlCommand cmd = new NpgsqlCommand("SELECT id, name, parent_category_id FROM categories ORDER BY name", conn);
+
+            using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+            List<Category> list = new List<Category>();
+
+            while (await reader.ReadAsync())
             {
                 list.Add(new Category
                 {
-                    Id = rdr.GetInt32(0),
-                    Name = rdr.GetString(1),
+                    Id = reader.GetInt32(0),
+                    Name = reader.GetString(1),
+                    ParentCategoryId = reader.IsDBNull(2) ? null : reader.GetInt32(2)
                 });
             }
+
             return list;
         }
 

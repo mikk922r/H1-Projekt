@@ -17,7 +17,7 @@ namespace Projekt
 
             // 2) Your scoped services:
             builder.Services.AddScoped<DBService>();
-            builder.Services.AddScoped<CurrentUserService>();
+            builder.Services.AddScoped<AuthenticationService>();
 
             // 3) Cookie-based auth:
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

@@ -11,6 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="Components\Components\AddProductModal.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="BasePage.cs" />
   </ItemGroup>
 
