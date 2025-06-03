@@ -14,10 +14,11 @@
         max-width: 80rem;
     }
 
-        footer > div:last-child p {
-            font-size: 0.875rem;
-            line-height: 1.25rem;
-        }
+    footer p,
+    footer > div > div:last-child > ul {
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+    }
 
         footer > div:last-child a {
             transition: background-color 0.25s ease-in-out;

@@ -3,10 +3,10 @@
 @inject DBService DBService
 @inject NavigationManager Nav
 
-<nav class="d-flex z-3 w-100 h-auto align-items-center justify-content-center position-sticky">
-    <header class="d-flex justify-space-between align-items-center px-4 gap-3 w-100">
+<header class="d-flex flex-column z-3 w-100 h-auto align-items-center justify-content-center position-sticky">
+    <nav class="d-flex justify-space-between align-items-center px-4 gap-3 w-100">
         <div class="d-flex justify-content-start flex-grow-1">
-            <a href="/" class="d-flex align-items-center gap-2 link-dark link-underline-opacity-0 fw-semibold">
+            <NavLink href="/" class="text-nowrap d-flex align-items-center gap-2 link-dark link-underline-opacity-0 fw-semibold">
                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--lucide" data-locator="src/App.tsx:Icon:19:12" width="24" height="24" viewBox="0 0 24 24">
                     <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
                         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4ZM3 6h18"></path>
@@ -15,19 +15,56 @@
                 </svg>
 
                 Tøjmarkedsplads
-            </a>
+            </NavLink>
         </div>
 
+        <section class="d-flex align-items-center h-100">
+            <ul class="list-unstyled d-flex align-items-center gap-4 my-0 p-2 rounded-2">
+                @foreach (var category in categories.Where(c => c.ParentCategoryId is null).OrderBy(c => c.Id))
+                {
+                    <li>
+                        <NavLink class="text-nowrap link-dark link-offset-2 link-underline-opacity-0 link-underline-opacity-25-hover" href="@($"/products/{category.Id}")">
+                            @category.Name
+                        </NavLink>
+                    </li>
+                }
+            </ul>
 
-        <ul>
+            <div class="position-absolute w-100">
+                <div class="d-flex justify-content-between px-4 mx-auto">
+                    @foreach (var category in categories.Where(c => c.ParentCategoryId is null).OrderBy(c => c.Id))
+                    {
+                        <div class="mt-3">
+                            <NavLink href="@($"/products/{category.Id}")" class="link-dark link-offset-2 link-underline-opacity-0 link-underline-opacity-25-hover fw-semibold">@category.Name</NavLink>
 
-        </ul>
+                            <ul class="list-unstyled">
+                                @foreach (var subCategory in categories.Where(c => c.ParentCategoryId == category.Id).OrderBy(c => c.Id))
+                                {
+                                    <li>
+                                        <NavLink class="link-dark link-offset-2 link-underline-opacity-0 link-underline-opacity-25-hover" href="@($"/products/{category.Id}/{subCategory.Id}")">
+                                            @subCategory.Name
+                                        </NavLink>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
 
-
-        <div class="d-flex justify-content-end flex-grow-1">
+        <div class="d-flex justify-content-end flex-grow-1 gap-2">
             @if (Auth.IsAuthenticated)
             {
-                <button type="button" class="d-flex align-items-center justify-content-center rounded-2 border border-0 bg-transparent py-0 px-2 gap-2" data-bs-toggle="dropdown" aria-expanded="false">
+                @* <NavLink class="text-nowrap btn btn-outline-success" href="/add-product">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                    </svg>
+
+                    Tilføj Produkt
+                </NavLink> *@
+
+                <button type="button" class="text-nowrap d-flex align-items-center justify-content-center rounded-2 border border-0 bg-transparent py-0 px-2 gap-2" data-bs-toggle="dropdown" aria-expanded="false">
                     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--lucide" data-locator="src/App.tsx:Icon:86:18" width="20" height="20" viewBox="0 0 24 24">
                         <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
                             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
@@ -39,25 +76,29 @@
                 </button>
 
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a href="/account" class="dropdown-item">Min konto</a></li>
-                    <li><a href="/orders" class="dropdown-item">Mine ordrer</a></li>
+                    <li><NavLink href="/account" class="dropdown-item">Min konto</NavLink></li>
+                    <li><NavLink href="/orders" class="dropdown-item">Mine ordrer</NavLink></li>
                     <li><button class="dropdown-item danger" @onclick="LogOut">Log ud</button></li>
                 </ul>
             } else {
                 <a href="/login" class="btn btn-primary">Log ind</a>
             }
         </div>
-    </header>
+    </nav>
 
     <span class="badge d-block rounded-circle position-fixed m-2 @(isConnected ? "bg-success" : "bg-danger")"></span>
-</nav>
+</header>
 
 @code {
     private bool isConnected = false;
 
+    private List<Category> categories = new List<Category>();
+
     protected override async Task OnInitializedAsync()
     {
         isConnected = await DBService.TestConnectionAsync();
+
+        categories = await DBService.GetAllCategoriesAsync();
     }
 
     private void LogOut()

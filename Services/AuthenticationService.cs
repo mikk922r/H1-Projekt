@@ -2,9 +2,9 @@
 
 namespace Projekt.Services
 {
-    public class CurrentUserService
+    public class AuthenticationService
     {
-        public event EventHandler<User?> CurrentUserHasChanged;
+        public event EventHandler<User?> OnCurrentUserHasChanged;
 
         public User? CurrentUser { get; private set; }
         public bool IsAuthenticated => CurrentUser != null;
@@ -14,7 +14,7 @@ namespace Projekt.Services
 
         protected virtual void OnCurrentUserChanged(User? e)
         {
-            EventHandler<User?> handler = CurrentUserHasChanged;
+            EventHandler<User?> handler = OnCurrentUserHasChanged;
 
             if (handler != null)
             {
