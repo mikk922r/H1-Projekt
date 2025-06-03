@@ -2,64 +2,85 @@
 @rendermode InteractiveServer
 @inherits BasePage
 
-@using System.ComponentModel.DataAnnotations
 @inject DBService DB
 @inject NavigationManager Nav
 
-<EditForm Model="newUser" OnValidSubmit="HandleRegister">
+<PageTitle>Register</PageTitle>
+
+<EditForm class="card mx-auto w-fit" Model="registerForm" OnValidSubmit="HandleRegister" FormName="Register">
     <DataAnnotationsValidator />
-    <ValidationSummary />
 
-    <div class="mb-3">
-        <label class="form-label">Name</label>
-        <InputText class="form-control" @bind-Value="newUser.Name" />
-        <ValidationMessage For="@(() => newUser.Name)" />
-    </div>
+    <article class="d-flex flex-column gap-3 p-3">
+        <h1 class="fs-3 text-center fw-semibold">Register</h1>
 
-    <div class="mb-3">
-        <label class="form-label">Email</label>
-        <InputText class="form-control" @bind-Value="newUser.Email" />
-        <ValidationMessage For="@(() => newUser.Email)" />
-    </div>
+        <div>
+            <label class="form-label">Navn</label>
 
-    <div class="mb-3">
-        <label class="form-label">Phone Code</label>
-        <InputNumber class="form-control" @bind-Value="newUser.PhoneCode" />
-        <ValidationMessage For="@(() => newUser.PhoneCode)" />
-    </div>
+            <InputText class="form-control" placeholder="Navn..." @bind-Value="registerForm.Name" />
 
-    <div class="mb-3">
-        <label class="form-label">Phone Number</label>
-        <InputText class="form-control" @bind-Value="newUser.PhoneNumber" />
-        <ValidationMessage For="@(() => newUser.PhoneNumber)" />
-    </div>
+            <ValidationMessage For="@(() => registerForm.Name)" />
+        </div>
 
-    <button type="submit" class="btn btn-primary">Register</button>
+        <div>
+            <label class="form-label">Email</label>
+
+            <InputText class="form-control" type="email" placeholder="Email..." @bind-Value="registerForm.Email" />
+
+            <ValidationMessage For="@(() => registerForm.Email)" />
+        </div>
+
+        <div>
+            <label class="form-label">Adgangskode</label>
+
+            <InputText class="form-control" type="password" placeholder="Adgangskode..." @bind-Value="registerForm.Password" />
+
+            <ValidationMessage For="@(() => registerForm.Password)" />
+        </div>
+
+        <div>
+            <label class="form-label">Telefonnummer</label>
+
+            <div class="input-group flex-nowrap d-flex">
+                <span class="input-group-text">+</span>
+
+                <InputNumber class="form-control rounded-0 w-1 text-center" type="text" placeholder="45" @bind-Value="registerForm.PhoneCode" />
+
+                <InputText class="form-control rounded-start-0 w-75" placeholder="12345678" @bind-Value="registerForm.PhoneNumber" />
+            </div>
+
+            <ValidationMessage For="@(() => registerForm.PhoneCode)" />
+            <ValidationMessage For="@(() => registerForm.PhoneNumber)" />
+        </div>
+
+        <div class="d-flex gap-3">
+            <button type="submit" class="btn btn-primary w-50">Register</button>
+
+            <NavLink href="/login" class="btn btn-outline-secondary w-50">Login</NavLink>
+        </div>
+
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <p class="alert alert-danger mb-0 p-2">@error</p>
+        }
+    </article>
 </EditForm>
 
-@if (!string.IsNullOrEmpty(error))
-{
-    <div class="alert alert-danger mt-2">@error</div>
-}
-
 @code {
-    private User newUser = new();
-    private string? error;
+    private RegisterForm registerForm = new RegisterForm();
+
+    private string error = string.Empty;
 
     private async Task HandleRegister()
     {
-        try
-        {
-            var newId = await DB.AddUserAsync(newUser);
-            newUser.Id = newId;
+        User? user = await Auth.Register(registerForm);
 
-            Auth.SignIn(newUser);
-            Nav.NavigateTo("/");
-        }
-        catch (Exception ex)
+        if (user is null)
         {
-            error = "Registration failed. Please try again.";
-            Console.Error.WriteLine($"Register failed: {ex.Message}");
+            error = "Der skete en fejl under registreringen. Prøv venligst igen.";
+
+            return;
         }
+
+        Nav.NavigateTo("/login");
     }
 }
