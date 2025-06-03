@@ -2,12 +2,11 @@
 @rendermode InteractiveServer
 @inherits BasePage
 
-@using Microsoft.AspNetCore.Components.Forms
-@using System.IO
-@using System
 @inject DBService DB
 @inject NavigationManager Nav
 @inject IWebHostEnvironment Env
+
+<PageTitle>Tilføj Produkt</PageTitle>
 
 <EditForm Model="product" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
