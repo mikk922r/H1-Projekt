@@ -233,7 +233,7 @@
         {
             try
             {
-                var uploadsFolder = Path.Combine(Env.WebRootPath, "uploads");
+                string uploadsFolder = Path.Combine(Env.WebRootPath, "uploads");
 
                 if (!Directory.Exists(uploadsFolder))
                 {

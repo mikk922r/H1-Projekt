@@ -2,9 +2,6 @@
 @rendermode InteractiveServer
 @inherits BasePage
 
-@using Projekt.Models
-@using Projekt.Services
-
 @inject DBService DB
 @inject NavigationManager Nav
 @inject OrderService OrderService
@@ -87,25 +84,25 @@
                                 </div>
                             }
 
-                            <p class="card-text"><strong>Beskrivelse:</strong></p>
-                            <p>
-                                @(string.IsNullOrWhiteSpace(product.Description)
-                                    ? (MarkupString)"<em>Ingen beskrivelse er angivet.</em>"
-                                    : product.Description)
-                            </p>
-                            <hr />
-                            <p><strong>Pris:</strong> @string.Format("{0:C}", product.Price)</p>
-                            <p>
-                                <strong>Farve:</strong>
-                                @(string.IsNullOrWhiteSpace(ColorHelper.GetColorName(product.Color)) ? "—" : ColorHelper.GetColorName(product.Color))
-                            </p>
-                            <p>
-                                <strong>Størrelse:</strong>
-                                @(string.IsNullOrWhiteSpace(product.Size) ? "—" : product.Size)
-                            </p>
-                            <p>
-                                <strong>Antal:</strong> @product.Quantity
-                                @if (product.Used)
+                        <p class="card-text"><strong>Beskrivelse:</strong></p>
+                        <p>
+                            @(string.IsNullOrWhiteSpace(product.Description)
+                                                    ? (MarkupString)"<em>Ingen beskrivelse er angivet.</em>"
+                                                    : product.Description)
+                    </p>
+                    <hr />
+                    <p><strong>Pris:</strong> @string.Format("{0:C}", product.Price)</p>
+                    <p>
+                        <strong>Farve:</strong>
+                        @(string.IsNullOrWhiteSpace(ColorHelper.GetColorName(product.Color)) ? "—" : ColorHelper.GetColorName(product.Color))
+                    </p>
+                    <p>
+                        <strong>Størrelse:</strong>
+                        @(string.IsNullOrWhiteSpace(product.Size) ? "—" : product.Size)
+                    </p>
+                    <p>
+                        <strong>Antal:</strong> @product.Quantity
+                        @if (product.Used)
                                 {
                                     <span class="badge bg-secondary ms-2">Brugt</span>
                                 }
@@ -286,20 +283,20 @@
 
         // Kopiér til editProduct for redigérings‐formularen
         editProduct = new Product
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Color = product.Color,
-                Size = product.Size,
-                Quantity = product.Quantity,
-                Used = product.Used,
-                BrandId = product.BrandId,
-                CategoryId = product.CategoryId,
-                UserId = product.UserId,
-                Image = product.Image
-            };
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            Price = product.Price,
+            Color = product.Color,
+            Size = product.Size,
+            Quantity = product.Quantity,
+            Used = product.Used,
+            BrandId = product.BrandId,
+            CategoryId = product.CategoryId,
+            UserId = product.UserId,
+            Image = product.Image
+        };
 
         categories = await DB.GetAllBrandsAsync();
         brands = await DB.GetAllCategoriesAsync();
@@ -341,20 +338,20 @@
         if (editMode && product != null)
         {
             editProduct = new Product
-                {
-                    Id = product.Id,
-                    Name = product.Name,
-                    Description = product.Description,
-                    Price = product.Price,
-                    Color = product.Color,
-                    Size = product.Size,
-                    Quantity = product.Quantity,
-                    Used = product.Used,
-                    BrandId = product.BrandId,
-                    CategoryId = product.CategoryId,
-                    UserId = product.UserId,
-                    Image = product.Image
-                };
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Color = product.Color,
+                Size = product.Size,
+                Quantity = product.Quantity,
+                Used = product.Used,
+                BrandId = product.BrandId,
+                CategoryId = product.CategoryId,
+                UserId = product.UserId,
+                Image = product.Image
+            };
         }
     }
 
@@ -363,20 +360,20 @@
         if (product != null)
         {
             editProduct = new Product
-                {
-                    Id = product.Id,
-                    Name = product.Name,
-                    Description = product.Description,
-                    Price = product.Price,
-                    Color = product.Color,
-                    Size = product.Size,
-                    Quantity = product.Quantity,
-                    Used = product.Used,
-                    BrandId = product.BrandId,
-                    CategoryId = product.CategoryId,
-                    UserId = product.UserId,
-                    Image = product.Image
-                };
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Color = product.Color,
+                Size = product.Size,
+                Quantity = product.Quantity,
+                Used = product.Used,
+                BrandId = product.BrandId,
+                CategoryId = product.CategoryId,
+                UserId = product.UserId,
+                Image = product.Image
+            };
         }
         saveSuccess = false;
         saveFailure = false;
@@ -393,23 +390,23 @@
         if (ok)
         {
             product = new Product
-                {
-                    Id = editProduct.Id,
-                    Name = editProduct.Name,
-                    Description = editProduct.Description,
-                    Price = editProduct.Price,
-                    Color = editProduct.Color,
-                    Size = editProduct.Size,
-                    Quantity = editProduct.Quantity,
-                    Used = editProduct.Used,
-                    BrandId = editProduct.BrandId,
-                    CategoryId = editProduct.CategoryId,
-                    UserId = editProduct.UserId,
-                    Image = editProduct.Image,
-                    BrandName = product.BrandName,
-                    CategoryName = product.CategoryName,
-                    UserName = product.UserName
-                };
+            {
+                Id = editProduct.Id,
+                Name = editProduct.Name,
+                Description = editProduct.Description,
+                Price = editProduct.Price,
+                Color = editProduct.Color,
+                Size = editProduct.Size,
+                Quantity = editProduct.Quantity,
+                Used = editProduct.Used,
+                BrandId = editProduct.BrandId,
+                CategoryId = editProduct.CategoryId,
+                UserId = editProduct.UserId,
+                Image = editProduct.Image,
+                BrandName = product.BrandName,
+                CategoryName = product.CategoryName,
+                UserName = product.UserName
+            };
 
             saveSuccess = true;
             editMode = false;
