@@ -21,7 +21,7 @@
     <h5 class="mb-2">Mærker</h5>
 
     <div class="d-flex flex-column gap-2 overflow-x-hidden overflow-y-auto px-1" style="max-height: 10rem;">
-        @foreach (var brand in _brands)
+        @foreach (Brand brand in _brands)
         {
             <label class="p-2 d-flex gap-2 align-items-center" style="margin: -8px;">
                 <input class="form-check-input mt-0" type="checkbox" checked="@brands.Contains(brand)" value="@brand" @onchange="() => BrandToggled(brand)" />
@@ -36,7 +36,7 @@
     <h5 class="mb-2">Størelser</h5>
 
     <div class="d-flex flex-wrap gap-2 px-1">
-        @foreach (var size in _sizes)
+        @foreach (string size in _sizes)
         {
             <label class="p-2 d-flex gap-2 align-items-center" style="margin: -8px;">
                 <input class="form-check-input mt-0" type="checkbox" checked="@sizes.Contains(size)" value="@size" @onchange="() => SizeToggled(size)" />
@@ -51,9 +51,9 @@
     <h5 class="mb-2">Farver</h5>
 
     <div class="d-flex flex-wrap gap-2 px-1">
-        @foreach (var color in _colors)
+        @foreach (Colors color in ColorHelper.GetColors())
         {
-            <button type="button" class="btn color @(GetColorClass(color) + (colors.Contains(color) ? " active" : ""))" @onclick="() => ToggleColor(color)"></button>
+            <button type="button" class="btn color @(ColorHelper.GetColorClass(color) + (colors.Contains(color) ? " active" : ""))" @onclick="() => ToggleColor(color)"></button>
         }
     </div>
 </div>
@@ -61,7 +61,6 @@
 @code {
     private List<Brand> _brands = new List<Brand>();
     private List<string> _sizes = new List<string> { "XS", "S", "M", "L", "XL", "XXL" };
-    private List<Colors> _colors = Enum.GetValues(typeof(Colors)).Cast<Colors>().ToList();
 
     [Parameter]
     public int minPrice { get; set; } = 0;
@@ -155,11 +154,6 @@
         }
 
         colorsChanged.InvokeAsync(colors);
-    }
-
-    private string GetColorClass(Colors color)
-    {
-        return Enum.GetName(typeof(Colors), color)?.ToLowerInvariant() ?? string.Empty;
     }
 }
 
