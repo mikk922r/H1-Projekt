@@ -1,0 +1,113 @@
+﻿@page "/orders"
+@rendermode InteractiveServer
+@inherits BasePage
+
+@inject NavigationManager Nav
+@inject OrderService OrderService
+
+<PageTitle>Mine Ordrer</PageTitle>
+
+<h2 class="mb-4">Mine Ordrer</h2>
+
+@if (!Auth.IsAuthenticated)
+{
+    <div class="alert alert-warning">
+        Du skal være logget ind for at se dine ordrer.
+        <button class="btn btn-primary ms-2" @onclick="GoLogin">
+            Login
+        </button>
+    </div>
+}
+else
+{
+    @* Use the field 'orderedList' below; it was set in OnInitializedAsync *@
+    @if (orderedList == null || orderedList.Count == 0)
+    {
+        <div class="alert alert-info">
+            Du har ingen ordrer endnu. Klik på “Bestil” ved et produkt for at tilføje det her.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Produktnavn</th>
+                        <th>Pris</th>
+                        <th>Billede</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < orderedList.Count; i++)
+                    {
+                        var prod = orderedList[i];
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>
+                                <a href="/product-details/@prod.Id">
+                                    @prod.Name
+                                </a>
+                            </td>
+                            <td>@string.Format("{0:C}", prod.Price)</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(prod.Image))
+                                {
+                                    <img src="@prod.Image"
+                                         alt="@prod.Name"
+                                         style="max-height: 50px; object-fit: cover;" />
+                                }
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-secondary"
+                                        @onclick="() => RemoveFromOrders(prod)">
+                                    Fjern
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <button class="btn btn-danger" @onclick="ClearOrders">
+            Ryd alle ordrer
+        </button>
+    }
+}
+
+@code {
+    // Holds the current session’s “bestilte” produkter.
+    private IReadOnlyList<Products> orderedList = Array.Empty<Products>();
+
+    protected override void OnInitialized()
+    {
+        if (Auth.IsAuthenticated)
+        {
+            // Initialize the list when the component first renders.
+            orderedList = OrderService.GetAllOrderedProducts();
+        }
+    }
+
+    private void GoLogin()
+    {
+        Nav.NavigateTo("/login");
+    }
+
+    private void RemoveFromOrders(Products prod)
+    {
+        OrderService.RemoveProduct(prod);
+        // Refresh our local copy:
+        orderedList = OrderService.GetAllOrderedProducts();
+        StateHasChanged();
+    }
+
+    private void ClearOrders()
+    {
+        OrderService.Clear();
+        orderedList = OrderService.GetAllOrderedProducts();
+        StateHasChanged();
+    }
+}
