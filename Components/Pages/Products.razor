@@ -1,0 +1,76 @@
+﻿@page "/products/{CategoryId:int}"
+@page "/products/{CategoryId:int}/{SubCategoryId:int}"
+@rendermode InteractiveServer
+@inherits BasePage
+
+@inject DBService DBService
+
+<PageTitle>Produkter</PageTitle>
+
+<div class="d-flex gap-4">
+    <Filter @bind-minPrice="minPrice" @bind-maxPrice="maxPrice" @bind-brands="brands" @bind-sizes="sizes" @bind-colors="colors" />
+
+    @if (!products.Where(Filter).Any())
+    {
+        <p class="m-auto fs-3 fw-semibold">Kunne ikke finde nogle produkter...</p>
+    }
+    else
+    {
+        <div class="d-flex flex-wrap gap-4">
+            @foreach (Product product in products.Where(Filter))
+            {
+                <ProductCard product="product" />
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int categoryId { get; set; }
+
+    [Parameter]
+    public int subCategoryId { get; set; }
+
+    private int minPrice = 0;
+
+    private int maxPrice = 100000;
+
+    private List<Brand> brands = new List<Brand>();
+
+    private List<string> sizes = new List<string>();
+
+    private List<Colors> colors = new List<Colors>();
+
+    private List<Product> products = new List<Product>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await DBService.GetAllProductsAsync(categoryId, subCategoryId);
+    }
+
+    private bool Filter(Product product)
+    {
+        if (product.Price < minPrice || product.Price > maxPrice)
+        {
+            return false;
+        }
+
+        if (brands.Count > 0 && !brands.Any(b => b.Id == product.BrandId))
+        {
+            return false;
+        }
+
+        if (sizes.Count > 0 && !string.IsNullOrEmpty(product.Size) && !sizes.Contains(product.Size))
+        {
+            return false;
+        }
+
+        if (colors.Count > 0 && !colors.Contains(product.Color))
+        {
+            return false;
+        }
+
+        return true;
+    }
+}

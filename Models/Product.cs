@@ -2,7 +2,7 @@
 
 namespace Projekt.Models
 {
-    public class Product
+    public class Product : IProduct
     {
         public int Id { get; set; }
 
@@ -22,6 +22,8 @@ namespace Projekt.Models
 
         public bool Used { get; set; }
 
+        public string? Image { get; set; }
+
         [Required]
         public int BrandId { get; set; }
 
@@ -29,8 +31,6 @@ namespace Projekt.Models
         public int CategoryId { get; set; }
 
         public int UserId { get; set; }
-
-        public string? Image { get; set; }
 
         public string BrandName { get; set; } = string.Empty;
 

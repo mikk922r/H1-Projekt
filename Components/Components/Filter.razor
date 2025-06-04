@@ -1,26 +1,25 @@
 ﻿@inject DBService DBService
-@using Projekt.Components.Components
 
-<div class="position-sticky" style="top: 1rem">
+<div id="filter" class="position-sticky card rounded-4 p-3 h-fit shadow-sm" style="top: 8rem">
     <div class="d-flex justify-content-between align-items-center mb-2">
         <h3 class="fw-semibold">Filter</h3>
 
-        <button class="btn btn-primary btn-sm" @onclick="Reset">Reset</button>
+        <button class="btn btn-primary btn-sm" @onclick="Reset">Nulstil</button>
     </div>
 
     <div class="mb-2 d-flex justify-content-between">
         <h5>Pris</h5>
 
-        <h5>@minPrice kr - @maxPrice kr</h5>
+        <h5>@minPrice.ToString("C", CultureInfo.CurrentCulture) - @maxPrice.ToString("C", CultureInfo.CurrentCulture)</h5>
     </div>
 
-    <DoubleRange min="0" max="10000" step="100" firstValue="@minPrice" firstValueChanged="(value) => minPriceChanged.InvokeAsync(value)" secondValue="@maxPrice" secondValueChanged="(value) => maxPriceChanged.InvokeAsync(value)" />
+    <DoubleRange min="0" max="100000" step="100" firstValue="@minPrice" firstValueChanged="(value) => minPriceChanged.InvokeAsync(value)" secondValue="@maxPrice" secondValueChanged="(value) => maxPriceChanged.InvokeAsync(value)" />
 
     <hr class="my-3" />
 
     <h5 class="mb-2">Mærker</h5>
 
-    <div class="d-flex flex-column gap-2 overflow-x-hidden overflow-y-auto px-1" style="max-height: 10rem;">
+    <div class="d-flex flex-column gap-2 overflow-x-hidden overflow-y-auto px-1" style="max-height: 20rem;">
         @foreach (Brand brand in _brands)
         {
             <label class="p-2 d-flex gap-2 align-items-center" style="margin: -8px;">
@@ -33,7 +32,7 @@
 
     <hr class="my-3" />
 
-    <h5 class="mb-2">Størelser</h5>
+    <h5 class="mb-2">Størrelser</h5>
 
     <div class="d-flex flex-wrap gap-2 px-1">
         @foreach (string size in _sizes)
@@ -53,7 +52,7 @@
     <div class="d-flex flex-wrap gap-2 px-1">
         @foreach (Colors color in ColorHelper.GetColors())
         {
-            <button type="button" class="btn color @(ColorHelper.GetColorClass(color) + (colors.Contains(color) ? " active" : ""))" @onclick="() => ToggleColor(color)"></button>
+            <button type="button" class="btn color @(ColorHelper.GetColorClass(color) + (colors.Contains(color) ? " active" : "")) rounded-circle" @onclick="() => ToggleColor(color)"></button>
         }
     </div>
 </div>
@@ -69,7 +68,7 @@
     public EventCallback<int> minPriceChanged { get; set; }
 
     [Parameter]
-    public int maxPrice { get; set; } = 10000;
+    public int maxPrice { get; set; } = 100000;
 
     [Parameter]
     public EventCallback<int> maxPriceChanged { get; set; }
@@ -100,7 +99,7 @@
     private void Reset()
     {
         minPrice = 0;
-        maxPrice = 10000;
+        maxPrice = 100000;
 
         minPriceChanged.InvokeAsync(minPrice);
         maxPriceChanged.InvokeAsync(maxPrice);

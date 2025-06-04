@@ -53,3 +53,61 @@ main {
 .h-fit {
     height: fit-content !important;
 }
+
+.fs-7 {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.fs-8 {
+    font-size: 0.75rem;
+    line-height: 1rem;
+}
+
+article.form {
+    width: 30rem;
+}
+
+.color.black {
+    background-color: black;
+}
+
+.color.white {
+    background-color: white;
+}
+
+.color.gray {
+    background-color: gray;
+}
+
+.color.red {
+    background-color: red;
+}
+
+.color.blue {
+    background-color: blue;
+}
+
+.color.green {
+    background-color: green;
+}
+
+.color.yellow {
+    background-color: yellow;
+}
+
+.color.purple {
+    background-color: purple;
+}
+
+.color.pink {
+    background-color: pink;
+}
+
+.color.orange {
+    background-color: orange;
+}
+
+.color.brown {
+    background-color: brown;
+}

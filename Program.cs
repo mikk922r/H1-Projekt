@@ -19,6 +19,7 @@ namespace Projekt
             builder.Services.AddScoped<DBService>();
             builder.Services.AddScoped<AuthenticationService>();
             builder.Services.AddScoped<OrderService>();
+            builder.Services.AddScoped<CartService>();
 
             // 3) Cookie-based auth:
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

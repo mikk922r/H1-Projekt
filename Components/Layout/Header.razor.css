@@ -21,31 +21,36 @@
                 line-height: 1.75rem;
             }
 
-            header > nav > section > ul {
-                transition: background-color .2s ease-in-out;
+            header > nav > section {
+                padding: 0 10rem;
             }
 
-            header > nav > section > div {
-                border-top: 1px solid rgba(17, 17, 17, 0.15);
-                display: none;
-                top: 4rem;
-                left: 0;
-            }
+                header > nav > section > ul {
+                    transition: background-color .2s ease-in-out;
+                }
 
-            header > nav > section:hover > ul {
-                background-color: rgba(17, 17, 17, 0.1);
-            }
+                header > nav > section > div {
+                    border-top: 1px solid rgba(17, 17, 17, 0.15);
+                    display: none;
+                    top: 4rem;
+                    left: 0;
+                }
 
-            header > nav > section:hover > div {
-                display: block;
-            }
+                header > nav > section:hover > ul {
+                    background-color: rgba(17, 17, 17, 0.1);
+                }
 
-            header > nav > section > div > div {
-                max-width: 80rem;
-            }
+                header > nav > section:hover > div {
+                    display: block;
+                }
+
+                header > nav > section > div > div {
+                    max-width: 80rem;
+                }
 
 button[data-bs-toggle] {
     transition: background-color .2s ease-in-out;
+    min-width: 2.5rem;
     height: 2.5rem;
 }
 
@@ -55,8 +60,9 @@ button[data-bs-toggle] {
     }
 
 .badge {
+    border: 1px solid rgba(17, 17, 17, 0.15);
+    right: 0.188rem;
+    top: 0.188rem;
     height: 1rem;
     width: 1rem;
-    right: 0;
-    top: 0;
 }

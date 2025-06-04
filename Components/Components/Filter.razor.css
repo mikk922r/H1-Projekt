@@ -1,12 +1,16 @@
-﻿hr {
+﻿#filter {
+    min-width: 20rem;
+    width: 20rem;
+}
+
+hr {
     background-color: rgba(17, 17, 17, 0.15)
 }
 
 .color {
     border: 1px solid rgba(17, 17, 17, 0.15) !important;
-    border-radius: 50%;
-    height: 32px;
-    width: 32px;
+    height: 2rem;
+    width: 2rem;
 }
 
     .color:focus {
@@ -15,48 +19,4 @@
 
     .color.active {
         box-shadow: 0 0 0 1.6px white, 0 0 0 4px #258cfb;
-    }
-
-    .color.black {
-        background-color: black;
-    }
-
-    .color.white {
-        background-color: white;
-    }
-
-    .color.gray {
-        background-color: gray;
-    }
-
-    .color.red {
-        background-color: red;
-    }
-
-    .color.blue {
-        background-color: blue;
-    }
-
-    .color.green {
-        background-color: green;
-    }
-
-    .color.yellow {
-        background-color: yellow;
-    }
-
-    .color.purple {
-        background-color: purple;
-    }
-
-    .color.pink {
-        background-color: pink;
-    }
-
-    .color.orange {
-        background-color: orange;
-    }
-
-    .color.brown {
-        background-color: brown;
     }

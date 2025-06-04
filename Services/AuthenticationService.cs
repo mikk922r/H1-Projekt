@@ -13,7 +13,7 @@ namespace Projekt.Services
             _dBService = dBService;
         }
 
-        public event EventHandler<User?> OnCurrentUserHasChanged = default!;
+        public event EventHandler<User?> OnCurrentUserHasChanged;
 
         public User? CurrentUser { get; private set; }
 

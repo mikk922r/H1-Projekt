@@ -8,220 +8,263 @@
 
 <PageTitle>Tilføj Produkt</PageTitle>
 
-<EditForm Model="product" OnValidSubmit="HandleValidSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<div class="d-flex gap-4 mx-auto w-100">
+    <EditForm class="card flex-grow-1 shadow-sm" Model="productForm" OnValidSubmit="HandleSubmit" FormName="AddProduct">
+        <DataAnnotationsValidator />
 
-    <div class="mb-3">
-        <label class="form-label">Name</label>
-        <InputText class="form-control" @bind-Value="product.Name" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Description</label>
-        <InputTextArea class="form-control" @bind-Value="product.Description" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Price</label>
-        <InputNumber class="form-control" @bind-Value="product.Price" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Color</label>
-        <InputSelect class="form-select" @bind-Value="product.Color">
-            <option value="">-- vælg farve --</option>
-            @foreach (Colors color in ColorHelper.GetColors())
-            {
-                <option value="@color">@ColorHelper.GetColorName(color)</option>
-            }
-        </InputSelect>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Size</label>
-        <InputText class="form-control" @bind-Value="product.Size" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Quantity</label>
-        <InputNumber class="form-control" @bind-Value="product.Quantity" />
-    </div>
-    <div class="form-check mb-3">
-        <InputCheckbox class="form-check-input" @bind-Value="product.Used" />
-        <label class="form-check-label">Used?</label>
-    </div>
+        <article class="d-flex flex-column gap-3 p-3">
+            <div>
+                <label class="form-label">Navn</label>
 
-    <div class="mb-3">
-        <label class="form-label">Brand</label>
-        <InputSelect class="form-select" @bind-Value="product.BrandId">
-            <option value="">-- select brand --</option>
-            @foreach (var b in brands)
-            {
-                <option value="@b.Id">@b.Name</option>
-            }
-        </InputSelect>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Category</label>
-        <InputSelect class="form-select" @bind-Value="product.CategoryId">
-            <option value="">-- select category --</option>
-            @foreach (var c in categories)
-            {
-                <option value="@c.Id">@c.Name</option>
-            }
-        </InputSelect>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Seller</label>
-        <InputSelect class="form-select" @bind-Value="product.UserId" disabled="!Auth.IsAuthenticated">
-            <option value="">-- select user --</option>
-            @foreach (var u in users)
-            {
-                <option value="@u.Id">@u.Name</option>
-            }
-        </InputSelect>
-    </div>
+                <InputText class="form-control" @bind-Value="productForm.Name" />
 
-    <!-- ─────────── IMAGE UPLOAD SECTION ─────────── -->
-    <div class="mb-3">
-        <label class="form-label">Upload Image</label>
-        <InputFile OnChange="HandleFileSelected" accept="image/*" class="form-control" />
-        @if (!string.IsNullOrEmpty(imageUploadError))
-        {
-            <div class="text-danger mt-1">@imageUploadError</div>
-        }
-        @if (!string.IsNullOrEmpty(previewImageUrl))
-        {
-            <img src="@previewImageUrl"
-                 class="img-thumbnail mt-2"
-                 style="max-height: 200px; object-fit: contain;" />
-        }
-    </div>
-    <!-- ───────── END IMAGE UPLOAD SECTION ──────────── -->
+                <ValidationMessage For="@(() => productForm.Name)" />
+            </div>
 
-    <button type="submit" class="btn btn-success">
-        Create Product
-    </button>
-</EditForm>
+            <div>
+                <label class="form-label">Beskrivelse</label>
+
+                <InputTextArea rows="5" class="form-control" @bind-Value="productForm.Description" />
+
+                <ValidationMessage For="@(() => productForm.Description)" />
+            </div>
+
+            <div>
+                <label class="form-label">Pris</label>
+
+                <InputNumber class="form-control" @bind-Value="productForm.Price" />
+
+                <ValidationMessage For="@(() => productForm.Price)" />
+            </div>
+
+            <div>
+                <label class="form-label">Farve</label>
+
+                <InputSelect class="form-select" @bind-Value="productForm.Color">
+                    <option value="">-- Vælg Farve --</option>
+
+                    @foreach (Colors color in ColorHelper.GetColors())
+                    {
+                        <option value="@color">@ColorHelper.GetColorName(color)</option>
+                    }
+                </InputSelect>
+
+                <ValidationMessage For="@(() => productForm.Color)" />
+            </div>
+
+            <div>
+                <label class="form-label">Størrelse</label>
+
+                <InputText class="form-control" @bind-Value="productForm.Size" />
+
+                <ValidationMessage For="@(() => productForm.Size)" />
+            </div>
+
+            <div>
+                <label class="form-label">Antal</label>
+
+                <InputNumber class="form-control" @bind-Value="productForm.Quantity" />
+
+                <ValidationMessage For="@(() => productForm.Quantity)" />
+            </div>
+
+            <div class="form-check">
+                <InputCheckbox class="form-check-input" @bind-Value="productForm.Used" />
+
+                <label class="form-check-label">Brugt?</label>
+            </div>
+
+            <div>
+                <label class="form-label">Mærke</label>
+
+                <InputSelect class="form-select" @bind-Value="productForm.BrandId">
+                    <option value="">-- Vælg Mærke --</option>
+
+                    @foreach (Brand brand in brands)
+                    {
+                        <option value="@brand.Id">@brand.Name</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div>
+                <label class="form-label">Kategori</label>
+
+                <InputSelect class="form-select" @bind-Value="productForm.CategoryId">
+                    <option value="">-- Vælg Kategori --</option>
+
+                    @foreach (Category category in categories.Where(c => c.ParentCategoryId is null).OrderBy(x => x.Id))
+                    {
+                        <optgroup label="@category.Name">
+                            @foreach (Category subCategory in categories.Where(sc => sc.ParentCategoryId == category.Id).OrderBy(x => x.Name))
+                            {
+                                <option value="@subCategory.Id">@subCategory.Name</option>
+                            }
+                        </optgroup>
+                    }
+                </InputSelect>
+            </div>
+
+            <div>
+                <label class="form-label">Sælger</label>
+
+                <InputSelect class="form-select" @bind-Value="productForm.UserId" disabled="!Auth.IsAuthenticated">
+                    <option value="">-- Vælg Sælger --</option>
+
+                    @foreach (User user in users)
+                    {
+                        <option value="@user.Id">@user.Name</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div>
+                <label class="form-label">Upload Image</label>
+
+                <InputFile OnChange="HandleFileSelected" accept="image/*" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn btn-success">Tilføj</button>
+        </article>
+    </EditForm>
+
+    <ProductCard product="GetPreviewProduct()" />
+</div>
 
 @code {
-    private Product product = new();
-    private List<Brand> brands = new();
-    private List<Category> categories = new();
-    private List<User> users = new();
-    private bool _hasRedirected;
+    private ProductForm productForm = new ProductForm();
 
-    // ─── FIELDS FOR IMAGE UPLOAD ───
+    private List<Brand> brands = new();
+
+    private List<Category> categories = new();
+
+    private List<User> users = new();
+
     private IBrowserFile? selectedFile;
-    private string? imageUploadError;
+
     private string? previewImageUrl;
-    // ────────────────────────────────
 
     protected override async Task OnInitializedAsync()
     {
         brands = await DB.GetAllBrandsAsync();
-        categories = await DB.GetAllCategoriesAsync();
-        users = await DB.GetAllUsersAsync();
 
-        if (Auth.IsAuthenticated)
-        {
-            product.UserId = Auth.CurrentUser!.Id;
-        }
+        categories = await DB.GetAllCategoriesAsync();
+
+        users = await DB.GetAllUsersAsync();
     }
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (firstRender && !_hasRedirected && !Auth.IsAuthenticated)
+        if (!firstRender)
         {
-            _hasRedirected = true;
-            Nav.NavigateTo("/login");
+            return;
         }
+
+        if (Auth.IsAuthenticated)
+        {
+            productForm.UserId = Auth.CurrentUser!.Id;
+
+            return;
+        }
+
+        Nav.NavigateTo("/login");
     }
 
-    // ─── Called when user picks a file in the <InputFile> control ───
+    private Product GetPreviewProduct()
+    {
+        return new Product
+        {
+            Name = !string.IsNullOrEmpty(productForm.Name) ? productForm.Name : "Navn",
+            Description = productForm.Description,
+            Price = productForm.Price,
+            Color = productForm.Color,
+            Size = productForm.Size,
+            Quantity = productForm.Quantity,
+            Used = productForm.Used,
+            Image = previewImageUrl,
+            BrandId = productForm.BrandId,
+            CategoryId = productForm.CategoryId,
+            UserId = Auth.IsAuthenticated ? Auth.CurrentUser!.Id : 0,
+            BrandName = brands.FirstOrDefault(b => b.Id == productForm.BrandId)?.Name ?? "Mærke",
+            CategoryName = categories.FirstOrDefault(c => c.Id == productForm.CategoryId)?.Name ?? "Kategori",
+            UserName = Auth.IsAuthenticated ? Auth.CurrentUser!.Name : "Sælger",
+        };
+    }
+
     private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
-        imageUploadError = null;
+        IBrowserFile file = selectedFile = e.File;
+
         previewImageUrl = null;
-        selectedFile = null;
 
-        var file = e.File;
-        if (file == null)
-        {
-            imageUploadError = "No file selected.";
-            return;
-        }
-        if (!file.ContentType.StartsWith("image/"))
-        {
-            imageUploadError = "Please select a valid image file.";
-            return;
-        }
-        if (file.Size > 2 * 1024 * 1024)
-        {
-            imageUploadError = "Image must be smaller than 2 MB.";
-            return;
-        }
-
-        selectedFile = file;
-
-        // Use an async read instead of synchronous Read(...)
         try
         {
-            // Open the stream (max 2 MB)
-            await using var stream = file.OpenReadStream(maxAllowedSize: 2 * 1024 * 1024);
-            var buffer = new byte[file.Size];
-            var read = 0;
+            await using Stream stream = file.OpenReadStream(2 * 1024 * 1024);
+
+            byte[] buffer = new byte[file.Size];
+
+            int read = 0;
+
             while (read < buffer.Length)
             {
-                var chunk = await stream.ReadAsync(buffer, read, buffer.Length - read);
-                if (chunk == 0) break;
+                int chunk = await stream.ReadAsync(buffer, read, buffer.Length - read);
+
+                if (chunk == 0)
+                {
+                    break;
+                }
+
                 read += chunk;
             }
 
-            // Convert to base64 for preview
-            var base64 = Convert.ToBase64String(buffer);
+            string base64 = Convert.ToBase64String(buffer);
+
             previewImageUrl = $"data:{file.ContentType};base64,{base64}";
         }
-        catch (Exception ex)
+        catch 
         {
-            imageUploadError = $"Error reading image: {ex.Message}";
+            return;
         }
     }
 
-    private async Task HandleValidSubmit()
+    private async Task HandleSubmit()
     {
-        // 1) If an image was selected, save it under wwwroot/uploads/
-        if (selectedFile != null)
+        if (selectedFile is not null)
         {
             try
             {
-                // Ensure “uploads” folder exists under wwwroot
                 var uploadsFolder = Path.Combine(Env.WebRootPath, "uploads");
+
                 if (!Directory.Exists(uploadsFolder))
+                {
                     Directory.CreateDirectory(uploadsFolder);
+                }
 
-                // Generate a GUID-based filename
-                var ext = Path.GetExtension(selectedFile.Name);
-                var uniqueFileName = $"{Guid.NewGuid()}{ext}";
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                string extension = Path.GetExtension(selectedFile.Name);
 
-                // Copy the uploaded file (max 2 MB) to “wwwroot/uploads/...”
-                await using var fs = new FileStream(filePath, FileMode.Create);
-                await selectedFile.OpenReadStream(maxAllowedSize: 2 * 1024 * 1024)
-                                   .CopyToAsync(fs);
+                string uniqueFileName = $"{Guid.NewGuid()}{extension}";
 
-                // Store the relative URL in product.Image
-                // e.g. “uploads/3f50b9a2-… .jpg”
-                product.Image = Path.Combine("uploads", uniqueFileName)
-                                    .Replace("\\", "/");
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                await using FileStream fileStream = new FileStream(filePath, FileMode.Create);
+
+                await selectedFile.OpenReadStream(2 * 1024 * 1024).CopyToAsync(fileStream);
+
+                productForm.Image = Path.Combine("uploads", uniqueFileName).Replace("\\", "/");
             }
-            catch (Exception ex)
+            catch 
             {
-                imageUploadError = $"Error saving image: {ex.Message}";
-                return; // Abort if image‐save fails
+                return;
             }
         }
 
-        // 2) Insert the product with its Image value (or null) into the DB
-        await DB.AddProductAsync(product);
+        int? id = await DB.AddProductAsync(productForm.ToEntity());
 
-        // 3) Redirect to Home ("/")
-        Nav.NavigateTo("/");
+        if (id is null)
+        {
+            return;
+        }
+
+        Nav.NavigateTo($"/product-details/{id}");
     }
 }

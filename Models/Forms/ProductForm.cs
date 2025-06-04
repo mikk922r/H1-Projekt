@@ -1,0 +1,62 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Projekt.Models.Forms
+{
+    public class ProductForm : IProduct
+    {
+        [Required(ErrorMessage = "Navn er påkrævet")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Beskrivelse er påkrævet")]
+        public string Description { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Pris er påkrævet")]
+        [Range(1, 100000, ErrorMessage = "Pris skal være mellem 1 og 999.999")]
+        public decimal Price { get; set; }
+
+        [Required(ErrorMessage = "Farve er påkrævet")]
+        public Colors Color { get; set; }
+
+        [Required(ErrorMessage = "Størrelse er påkrævet")]
+        public string Size { get; set; } = string.Empty;
+
+        public int Quantity { get; set; }
+
+        public bool Used { get; set; }
+
+        public string? Image { get; set; }
+
+        [Required(ErrorMessage = "Mærke er påkrævet")]
+        public int BrandId { get; set; }
+
+        [Required(ErrorMessage = "Kategori er påkrævet")]
+        public int CategoryId { get; set; }
+
+        [Required(ErrorMessage = "Bruger er påkrævet")]
+        public int UserId { get; set; }
+
+        public string BrandName { get; set; } = string.Empty;
+
+        public string CategoryName { get; set; } = string.Empty;
+
+        public string? UserName { get; set; }
+
+        public Product ToEntity()
+        {
+            return new Product
+            {
+                Name = Name,
+                Description = Description,
+                Price = Price,
+                Color = Color,
+                Size = Size,
+                Quantity = Quantity,
+                Used = Used,
+                Image = Image,
+                BrandId = BrandId,
+                CategoryId = CategoryId,
+                UserId = UserId
+            };
+        }
+    }
+}

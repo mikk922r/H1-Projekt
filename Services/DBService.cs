@@ -13,22 +13,6 @@ namespace Projekt.Services
             _connectionString = configuration.GetConnectionString("DefaultConnection")!;
         }
 
-        public async Task<bool> TestConnectionAsync()
-        {
-            try
-            {
-                await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
-
-                await conn.OpenAsync();
-
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
         #region Users
 
         public async Task<List<User>> GetAllUsersAsync()
@@ -166,39 +150,28 @@ namespace Projekt.Services
 
         #region Products
 
-        public async Task<List<Product>> GetAllProductsAsync()
+        public async Task<List<Product>> GetAllProductsAsync(int category = 0, int subCategory = 0)
         {
-            const string sql = @"
-        SELECT 
-            p.id,
-            p.name,
-            p.description,
-            p.price,
-            p.color,
-            p.size,
-            p.quantity,
-            p.used,
-            p.image,
-            p.brand_id,
-            p.category_id,
-            p.user_id,
-            b.name    AS brand_name,
-            c.name    AS category_name,
-            u.name    AS user_name
-        FROM products p
-        JOIN brands     b ON b.id = p.brand_id
-        JOIN categories c ON c.id = p.category_id
-        LEFT JOIN users  u ON u.id = p.user_id
-        ORDER BY p.name;
-    ";
+            string sql = @$"
+                SELECT p.* FROM get_products_with_names p
+                WHERE 
+                    (@category = 0 OR 
+                    (@sub_category = 0 AND p.category_id IN (SELECT id FROM categories WHERE parent_category_id = @category)) OR
+                    (@sub_category > 0 AND p.category_id = @sub_category))
+                ORDER BY name;
+            ";
 
-            await using var conn = new NpgsqlConnection(_connectionString);
+            await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
-            using var cmd = new NpgsqlCommand(sql, conn);
-            using var reader = await cmd.ExecuteReaderAsync();
+            using NpgsqlCommand cmd = new NpgsqlCommand(sql, conn);
 
-            var list = new List<Product>();
+            cmd.Parameters.AddWithValue("category", category);
+            cmd.Parameters.AddWithValue("sub_category", subCategory);
+
+            using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+            List<Product> list = new List<Product>();
 
             while (await reader.ReadAsync())
             {
@@ -240,7 +213,7 @@ namespace Projekt.Services
             using NpgsqlCommand cmd = new NpgsqlCommand(sql, conn);
 
             cmd.Parameters.AddWithValue("name", product.Name);
-            cmd.Parameters.AddWithValue("description", product.Description ?? "");
+            cmd.Parameters.AddWithValue("description", product.Description);
             cmd.Parameters.AddWithValue("price", product.Price);
             cmd.Parameters.AddWithValue("color", ColorHelper.GetColorValue(product.Color));
             cmd.Parameters.AddWithValue("size", product.Size);
@@ -251,8 +224,6 @@ namespace Projekt.Services
             cmd.Parameters.AddWithValue("user", product.UserId);
             cmd.Parameters.AddWithValue("image", string.IsNullOrWhiteSpace(product.Image) ? DBNull.Value : product.Image);
 
-            using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
-
             object? result = await cmd.ExecuteScalarAsync();
 
             int? id = result is not null ? (int)result : null;
@@ -262,34 +233,10 @@ namespace Projekt.Services
 
         public async Task<Product?> GetProductByIdAsync(int id)
         {
-            const string sql = @"
-                SELECT 
-                    p.id,
-                    p.name,
-                    p.description,
-                    p.price,
-                    p.color,
-                    p.size,
-                    p.quantity,
-                    p.used,
-                    p.image,
-                    p.brand_id,
-                    p.category_id,
-                    p.user_id,
-                    b.name    AS brand_name,
-                    c.name    AS category_name,
-                    u.name    AS user_name
-                FROM products p
-                JOIN brands     b ON b.id = p.brand_id
-                JOIN categories c ON c.id = p.category_id
-                LEFT JOIN users  u ON u.id = p.user_id
-                WHERE p.id = @id;
-            ";
-
             await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
-            using NpgsqlCommand cmd = new NpgsqlCommand(sql, conn);
+            using NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM get_products_with_names WHERE id = @id;", conn);
 
             cmd.Parameters.AddWithValue("id", id);
 

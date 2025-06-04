@@ -1,6 +1,8 @@
 ﻿@inherits LayoutComponentBase
 @implements IDisposable
+
 @inject AuthenticationService Auth
+@inject CartService CartService
 
 <Header />
 
@@ -12,15 +14,15 @@
     protected override void OnInitialized()
     {
         Auth.OnCurrentUserHasChanged += OnCurrentUserChanged;
+        CartService.OnCartHasChanged += OnCartChanged;
     }
 
-    private void OnCurrentUserChanged(object? sender, User? user)
-    {
-        InvokeAsync(StateHasChanged);
-    }
+    private void OnCurrentUserChanged(object? sender, User? user) => InvokeAsync(StateHasChanged);
+    private void OnCartChanged(object? sender, List<Product> products) => InvokeAsync(StateHasChanged);
 
     public void Dispose()
     {
         Auth.OnCurrentUserHasChanged -= OnCurrentUserChanged;
+        CartService.OnCartHasChanged -= OnCartChanged;
     }
 }
