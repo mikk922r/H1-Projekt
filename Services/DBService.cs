@@ -168,30 +168,36 @@ namespace Projekt.Services
         public async Task<List<Products>> GetAllProductsAsync()
         {
             const string sql = @"
-                SELECT 
-                    id,
-                    name,
-                    description,
-                    price,
-                    color,
-                    size,
-                    quantity,
-                    used,
-                    brand_id,
-                    category_id,
-                    user_id,
-                    image
-                 FROM products
-                 ORDER BY name;
-            ";
+        SELECT 
+            p.id,
+            p.name,
+            p.description,
+            p.price,
+            p.color,
+            p.size,
+            p.quantity,
+            p.used,
+            p.brand_id,
+            p.category_id,
+            p.user_id,
+            p.image,
+            b.name    AS brand_name,
+            c.name    AS category_name,
+            u.name    AS user_name
+        FROM products p
+        JOIN brands     b ON b.id = p.brand_id
+        JOIN categories c ON c.id = p.category_id
+        LEFT JOIN users  u ON u.id = p.user_id
+        ORDER BY p.name;
+    ";
 
-            await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
+            await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
-            using NpgsqlCommand cmd = new NpgsqlCommand(sql, conn);
-            using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+            using var cmd = new NpgsqlCommand(sql, conn);
+            using var reader = await cmd.ExecuteReaderAsync();
 
-            List<Products> list = new List<Products>();
+            var list = new List<Products>();
 
             while (await reader.ReadAsync())
             {
@@ -209,16 +215,15 @@ namespace Projekt.Services
                     CategoryId = reader.GetInt32(9),
                     UserId = reader.GetInt32(10),
                     Image = reader.IsDBNull(11) ? null : reader.GetString(11),
-
-                    // The three new name‐fields remain null here only the detail lookup populates them.
-                    BrandName = string.Empty,
-                    CategoryName = string.Empty,
-                    UserName = null
+                    BrandName = reader.GetString(12),
+                    CategoryName = reader.GetString(13),
+                    UserName = reader.IsDBNull(14) ? null : reader.GetString(14)
                 });
             }
 
             return list;
         }
+
 
         public async Task<int?> AddProductAsync(Products prod)
         {
