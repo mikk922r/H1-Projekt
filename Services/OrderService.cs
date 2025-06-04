@@ -6,17 +6,17 @@ namespace Projekt.Services
   
     public class OrderService
     {
-        private readonly List<Products> _orderedProducts = new();
+        private readonly List<Product> _orderedProducts = new();
 
      
-        public void AddProduct(Products p)
+        public void AddProduct(Product p)
         {
             if (p is null) return;
             _orderedProducts.Add(p);
         }
 
 
-        public void RemoveProduct(Products p)
+        public void RemoveProduct(Product p)
         {
             if (p is null) return;
             _orderedProducts.Remove(p);
@@ -29,7 +29,7 @@ namespace Projekt.Services
         }
 
      
-        public IReadOnlyList<Products> GetAllOrderedProducts() =>
+        public IReadOnlyList<Product> GetAllOrderedProducts() =>
             _orderedProducts.AsReadOnly();
     }
 }

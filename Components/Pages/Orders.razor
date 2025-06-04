@@ -80,7 +80,7 @@ else
 
 @code {
     // Holds the current session’s “bestilte” produkter.
-    private IReadOnlyList<Products> orderedList = Array.Empty<Products>();
+    private IReadOnlyList<Product> orderedList = Array.Empty<Product>();
 
     protected override void OnInitialized()
     {
@@ -96,7 +96,7 @@ else
         Nav.NavigateTo("/login");
     }
 
-    private void RemoveFromOrders(Products prod)
+    private void RemoveFromOrders(Product prod)
     {
         OrderService.RemoveProduct(prod);
         // Refresh our local copy:
