@@ -26,7 +26,13 @@
     </div>
     <div class="mb-3">
         <label class="form-label">Color</label>
-        <InputText class="form-control" @bind-Value="product.Color" />
+        <InputSelect class="form-select" @bind-Value="product.Color">
+            <option value="">-- vælg farve --</option>
+            @foreach (Colors color in ColorHelper.GetColors())
+            {
+                <option value="@color">@ColorHelper.GetColorName(color)</option>
+            }
+        </InputSelect>
     </div>
     <div class="mb-3">
         <label class="form-label">Size</label>
@@ -95,7 +101,7 @@
 </EditForm>
 
 @code {
-    private Products product = new();
+    private Product product = new();
     private List<Brand> brands = new();
     private List<Category> categories = new();
     private List<User> users = new();

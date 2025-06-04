@@ -85,7 +85,7 @@
                             <p><strong>Pris:</strong> @string.Format("{0:C}", product.Price)</p>
                             <p>
                                 <strong>Farve:</strong>
-                                @(string.IsNullOrWhiteSpace(product.Color) ? "—" : product.Color)
+                                @(string.IsNullOrWhiteSpace(ColorHelper.GetColorName(product.Color)) ? "—" : ColorHelper.GetColorName(product.Color))
                             </p>
                             <p>
                                 <strong>Størrelse:</strong>
@@ -154,7 +154,13 @@
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Farve</label>
-                                <InputText class="form-control" @bind-Value="editProduct.Color" />
+                                <InputSelect class="form-select" @bind-Value="editProduct.Color">
+                                    <option value="">-- vælg farve --</option>
+                                    @foreach (Colors color in ColorHelper.GetColors())
+                                    {
+                                        <option value="@color">@ColorHelper.GetColorName(color)</option>
+                                    }
+                                </InputSelect>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Størrelse</label>
@@ -227,8 +233,8 @@
     [Parameter]
     public int ProductId { get; set; }
 
-    private Products? product;
-    private Products editProduct = new();
+    private Product? product;
+    private Product editProduct = new();
     private bool isOwner = false;
     private bool editMode = false;
     private bool isLoading = true;
@@ -256,7 +262,7 @@
         }
 
         // Kopiér til editProduct
-        editProduct = new Products
+        editProduct = new Product
             {
                 Id = product.Id,
                 Name = product.Name,
@@ -287,7 +293,7 @@
 
         if (editMode && product != null)
         {
-            editProduct = new Products
+            editProduct = new Product
                 {
                     Id = product.Id,
                     Name = product.Name,
@@ -309,7 +315,7 @@
     {
         if (product != null)
         {
-            editProduct = new Products
+            editProduct = new Product
                 {
                     Id = product.Id,
                     Name = product.Name,
@@ -340,7 +346,7 @@
         if (ok)
         {
             // Efter en succesfuld update, bevarer vi de samme joined‐navne
-            product = new Products
+            product = new Product
                 {
                     Id = editProduct.Id,
                     Name = editProduct.Name,

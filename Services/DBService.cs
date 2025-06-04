@@ -1,4 +1,5 @@
 ﻿using Npgsql;
+using Projekt.Helpers;
 using Projekt.Models;
 
 namespace Projekt.Services
@@ -165,7 +166,7 @@ namespace Projekt.Services
 
         #region Products
 
-        public async Task<List<Products>> GetAllProductsAsync()
+        public async Task<List<Product>> GetAllProductsAsync()
         {
             const string sql = @"
         SELECT 
@@ -177,10 +178,10 @@ namespace Projekt.Services
             p.size,
             p.quantity,
             p.used,
+            p.image,
             p.brand_id,
             p.category_id,
             p.user_id,
-            p.image,
             b.name    AS brand_name,
             c.name    AS category_name,
             u.name    AS user_name
@@ -197,24 +198,24 @@ namespace Projekt.Services
             using var cmd = new NpgsqlCommand(sql, conn);
             using var reader = await cmd.ExecuteReaderAsync();
 
-            var list = new List<Products>();
+            var list = new List<Product>();
 
             while (await reader.ReadAsync())
             {
-                list.Add(new Products
+                list.Add(new Product
                 {
                     Id = reader.GetInt32(0),
                     Name = reader.GetString(1),
                     Description = reader.GetString(2),
                     Price = reader.GetDecimal(3),
-                    Color = reader.IsDBNull(4) ? null : reader.GetString(4),
-                    Size = reader.IsDBNull(5) ? null : reader.GetString(5),
+                    Color = ColorHelper.GetColorByValue(reader.GetInt32(4)),
+                    Size = reader.GetString(5),
                     Quantity = reader.GetInt32(6),
                     Used = reader.GetBoolean(7),
-                    BrandId = reader.GetInt32(8),
-                    CategoryId = reader.GetInt32(9),
-                    UserId = reader.GetInt32(10),
-                    Image = reader.IsDBNull(11) ? null : reader.GetString(11),
+                    Image = reader.IsDBNull(8) ? null : reader.GetString(8),
+                    BrandId = reader.GetInt32(9),
+                    CategoryId = reader.GetInt32(10),
+                    UserId = reader.GetInt32(11),
                     BrandName = reader.GetString(12),
                     CategoryName = reader.GetString(13),
                     UserName = reader.IsDBNull(14) ? null : reader.GetString(14)
@@ -225,11 +226,11 @@ namespace Projekt.Services
         }
 
 
-        public async Task<int?> AddProductAsync(Products prod)
+        public async Task<int?> AddProductAsync(Product product)
         {
             const string sql = @"
-                INSERT INTO products (name, description, price, color, size, quantity, used, brand_id, category_id, user_id, image)
-                VALUES (@name, @desc, @price, @color, @size, @qty, @used, @brand, @cat, @user, @image)
+                INSERT INTO products (name, description, price, color, size, quantity, used, image, brand_id, category_id, user_id)
+                VALUES (@name, @description, @price, @color, @size, @quantity, @used, @image, @brand, @category, @user)
                 RETURNING id;
             ";
 
@@ -238,25 +239,17 @@ namespace Projekt.Services
 
             using NpgsqlCommand cmd = new NpgsqlCommand(sql, conn);
 
-            cmd.Parameters.AddWithValue("name", prod.Name);
-            cmd.Parameters.AddWithValue("desc", prod.Description ?? "");
-            cmd.Parameters.AddWithValue("price", prod.Price);
-            cmd.Parameters.AddWithValue("color", (object?)prod.Color ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("size", (object?)prod.Size ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("qty", prod.Quantity);
-            cmd.Parameters.AddWithValue("used", prod.Used);
-            cmd.Parameters.AddWithValue("brand", prod.BrandId);
-            cmd.Parameters.AddWithValue("cat", prod.CategoryId);
-            cmd.Parameters.AddWithValue("user", prod.UserId);
-
-            if (string.IsNullOrWhiteSpace(prod.Image))
-            {
-                cmd.Parameters.AddWithValue("image", DBNull.Value);
-            }
-            else
-            {
-                cmd.Parameters.AddWithValue("image", prod.Image);
-            }
+            cmd.Parameters.AddWithValue("name", product.Name);
+            cmd.Parameters.AddWithValue("description", product.Description ?? "");
+            cmd.Parameters.AddWithValue("price", product.Price);
+            cmd.Parameters.AddWithValue("color", ColorHelper.GetColorValue(product.Color));
+            cmd.Parameters.AddWithValue("size", product.Size);
+            cmd.Parameters.AddWithValue("quantity", product.Quantity);
+            cmd.Parameters.AddWithValue("used", product.Used);
+            cmd.Parameters.AddWithValue("brand", product.BrandId);
+            cmd.Parameters.AddWithValue("category", product.CategoryId);
+            cmd.Parameters.AddWithValue("user", product.UserId);
+            cmd.Parameters.AddWithValue("image", string.IsNullOrWhiteSpace(product.Image) ? DBNull.Value : product.Image);
 
             using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
 
@@ -267,7 +260,7 @@ namespace Projekt.Services
             return id;
         }
 
-        public async Task<Products?> GetProductByIdAsync(int id)
+        public async Task<Product?> GetProductByIdAsync(int id)
         {
             const string sql = @"
                 SELECT 
@@ -279,10 +272,10 @@ namespace Projekt.Services
                     p.size,
                     p.quantity,
                     p.used,
+                    p.image,
                     p.brand_id,
                     p.category_id,
                     p.user_id,
-                    p.image,
                     b.name    AS brand_name,
                     c.name    AS category_name,
                     u.name    AS user_name
@@ -307,27 +300,27 @@ namespace Projekt.Services
                 return null;
             }
 
-            return new Products
+            return new Product
             {
                 Id = reader.GetInt32(0),
                 Name = reader.GetString(1),
                 Description = reader.GetString(2),
                 Price = reader.GetDecimal(3),
-                Color = reader.IsDBNull(4) ? null : reader.GetString(4),
-                Size = reader.IsDBNull(5) ? null : reader.GetString(5),
+                Color = ColorHelper.GetColorByValue(reader.GetInt32(4)),
+                Size = reader.GetString(5),
                 Quantity = reader.GetInt32(6),
                 Used = reader.GetBoolean(7),
-                BrandId = reader.GetInt32(8),
-                CategoryId = reader.GetInt32(9),
-                UserId = reader.GetInt32(10),
-                Image = reader.IsDBNull(11) ? null : reader.GetString(11),
+                Image = reader.IsDBNull(8) ? null : reader.GetString(8),
+                BrandId = reader.GetInt32(9),
+                CategoryId = reader.GetInt32(10),
+                UserId = reader.GetInt32(11),
                 BrandName = reader.GetString(12),
                 CategoryName = reader.GetString(13),
                 UserName = reader.IsDBNull(14) ? null : reader.GetString(14)
             };
         }
 
-        public async Task<bool> UpdateProductAsync(Products prod)
+        public async Task<bool> UpdateProductAsync(Product product)
         {
             const string sql = @"
                 UPDATE products SET 
@@ -348,16 +341,16 @@ namespace Projekt.Services
 
             using NpgsqlCommand cmd = new NpgsqlCommand(sql, conn);
 
-            cmd.Parameters.AddWithValue("name", prod.Name);
-            cmd.Parameters.AddWithValue("description", prod.Description ?? string.Empty);
-            cmd.Parameters.AddWithValue("price", prod.Price);
-            cmd.Parameters.AddWithValue("color", (object?)prod.Color ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("size", (object?)prod.Size ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("quantity", prod.Quantity);
-            cmd.Parameters.AddWithValue("used", prod.Used);
-            cmd.Parameters.AddWithValue("brand", prod.BrandId);
-            cmd.Parameters.AddWithValue("category", prod.CategoryId);
-            cmd.Parameters.AddWithValue("id", prod.Id);
+            cmd.Parameters.AddWithValue("name", product.Name);
+            cmd.Parameters.AddWithValue("description", product.Description ?? string.Empty);
+            cmd.Parameters.AddWithValue("price", product.Price);
+            cmd.Parameters.AddWithValue("color", ColorHelper.GetColorValue(product.Color));
+            cmd.Parameters.AddWithValue("size", product.Size);
+            cmd.Parameters.AddWithValue("quantity", product.Quantity);
+            cmd.Parameters.AddWithValue("used", product.Used);
+            cmd.Parameters.AddWithValue("brand", product.BrandId);
+            cmd.Parameters.AddWithValue("category", product.CategoryId);
+            cmd.Parameters.AddWithValue("id", product.Id);
 
             int rowsAffected = await cmd.ExecuteNonQueryAsync();
 
