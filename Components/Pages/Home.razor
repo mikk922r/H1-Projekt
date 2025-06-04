@@ -2,10 +2,38 @@
 @rendermode InteractiveServer
 @inherits BasePage
 
+@using Projekt.Models
+@using Projekt.Services
+
 @inject DBService DBService
 @inject NavigationManager Nav
+@inject OrderService OrderService
 
 <PageTitle>Forside</PageTitle>
+
+@* ---------- Success‐besked (vises midt på skærmen) ---------- *@
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success alert-dismissible fade show"
+         role="alert"
+         style="
+           position: fixed;
+           top: 50%;
+           left: 50%;
+           transform: translate(-50%, -50%);
+           z-index: 1050;
+           width: 80%;
+           max-width: 400px;
+             ">
+        @successMessage
+        <button type="button"
+                class="btn-close"
+                aria-label="Close"
+                @onclick="ClearMessage"
+                style="position: absolute; top: 8px; right: 8px;">
+        </button>
+    </div>
+}
 
 <div class="row mb-4 align-items-center">
     <div class="col">
@@ -59,7 +87,7 @@
         {
             <div class="col">
                 <div class="card h-100 shadow-sm">
-                    @* If an image exists, show it at the top of the card *@
+                    @* Hvis et billede findes… *@
                     @if (!string.IsNullOrWhiteSpace(p.Image))
                     {
                         <img src="@p.Image"
@@ -97,10 +125,16 @@
                             <strong>Sælger:</strong> @(!string.IsNullOrWhiteSpace(p.UserName) ? p.UserName : "—")
                         </p>
 
-                        <button class="btn btn-outline-primary mt-auto"
-                                @onclick="() => ViewProductDetails(p.Id)">
-                            Vis detaljer
-                        </button>
+                        <div class="mt-auto d-flex justify-content-between">
+                            <button class="btn btn-outline-primary"
+                                    @onclick="() => ViewProductDetails(p.Id)">
+                                Vis detaljer
+                            </button>
+                            <button class="btn btn-success"
+                                    @onclick="() => AddToOrders(p)">
+                                Bestil
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -116,15 +150,46 @@ else if (products is not null)
 
 @code {
     private List<Product>? products;
+    private string? successMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        // Load all products as soon as Home loads (ensure BrandName, CategoryName, UserName are included)
+        // Load all products as soon as Home loads
         products = await DBService.GetAllProductsAsync();
     }
 
     private void ViewProductDetails(int productId)
     {
         Nav.NavigateTo($"/product-details/{productId}");
+    }
+
+    private void AddToOrders(Product p)
+    {
+        if (!Auth.IsAuthenticated)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        OrderService.AddProduct(p);
+
+        // Sæt en kreativ bekræftelses‐besked:
+        successMessage = $"🎉 Fantastisk! \"{p.Name}\" er nu i din kurv!";
+        StateHasChanged();
+
+        // Kald en async helper, der fjerner beskeden efter 3 sekunder
+        _ = ClearSuccessMessageAfterDelay();
+    }
+
+    private async Task ClearSuccessMessageAfterDelay()
+    {
+        await Task.Delay(3000);
+        successMessage = null;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void ClearMessage()
+    {
+        successMessage = null;
     }
 }

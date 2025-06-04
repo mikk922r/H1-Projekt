@@ -2,10 +2,23 @@
 @rendermode InteractiveServer
 @inherits BasePage
 
+@using Projekt.Models
+@using Projekt.Services
+
 @inject DBService DB
 @inject NavigationManager Nav
+@inject OrderService OrderService
 
 <PageTitle>Produkt @ProductId</PageTitle>
+
+@* ---------- Success‐besked (kun når successMessage != null) ---------- *@
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @successMessage
+        <button type="button" class="btn-close" aria-label="Close" @onclick="() => ClearMessage()"></button>
+    </div>
+}
 
 <div class="container py-4">
 
@@ -64,7 +77,6 @@
                         <div class="card-body">
                             <h5 class="card-title mb-3">@product.Name</h5>
 
-                            @* Vis billedet, hvis det findes *@
                             @if (!string.IsNullOrWhiteSpace(product.Image))
                             {
                                 <div class="text-center mb-3">
@@ -105,6 +117,15 @@
                                 <strong>Sælger:</strong>
                                 @(string.IsNullOrWhiteSpace(product.UserName) ? "—" : product.UserName)
                             </p>
+
+                            @* ----------------------------- *@
+                            @* “Bestil” button: *@
+                            @* ----------------------------- *@
+                            <div class="mt-4">
+                                <button class="btn btn-success" @onclick="HandleBestil">
+                                    Bestil
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -245,6 +266,8 @@
     private List<Brand> categories = new();
     private List<Category> brands = new();
 
+    private string? successMessage;
+
     protected override async Task OnInitializedAsync()
     {
         // Indlæs produktet inkl. brand/category/user-navne
@@ -261,7 +284,7 @@
             isOwner = (product.UserId == Auth.CurrentUser.Id);
         }
 
-        // Kopiér til editProduct
+        // Kopiér til editProduct for redigérings‐formularen
         editProduct = new Product
             {
                 Id = product.Id,
@@ -278,11 +301,35 @@
                 Image = product.Image
             };
 
-        // Indlæs dropdown-data
         categories = await DB.GetAllBrandsAsync();
         brands = await DB.GetAllCategoriesAsync();
 
         isLoading = false;
+    }
+
+    private void HandleBestil()
+    {
+        if (!Auth.IsAuthenticated)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        if (product != null)
+        {
+            OrderService.AddProduct(product);
+
+            // Kreativ bekræftelses‐besked:
+            successMessage = $"🛒 Hurra! \"{product.Name}\" er lagt i kurven.";
+            StateHasChanged();
+
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(3000);
+                successMessage = null;
+                await InvokeAsync(StateHasChanged);
+            });
+        }
     }
 
     private void ToggleEditMode()
@@ -345,7 +392,6 @@
         var ok = await DB.UpdateProductAsync(editProduct);
         if (ok)
         {
-            // Efter en succesfuld update, bevarer vi de samme joined‐navne
             product = new Product
                 {
                     Id = editProduct.Id,
@@ -377,5 +423,10 @@
     private void NavigateHome()
     {
         Nav.NavigateTo("/");
+    }
+
+    private void ClearMessage()
+    {
+        successMessage = null;
     }
 }

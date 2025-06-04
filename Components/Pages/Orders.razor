@@ -20,7 +20,7 @@
 }
 else
 {
-    @* Use the field 'orderedList' below; it was set in OnInitializedAsync *@
+    @* Use the field 'orderedList' below; it was set in OnInitialized *@
     @if (orderedList == null || orderedList.Count == 0)
     {
         <div class="alert alert-info">
@@ -72,7 +72,7 @@ else
             </table>
         </div>
 
-        <button class="btn btn-danger" @onclick="ClearOrders">
+        <button class="btn btn-danger mt-3" @onclick="ClearOrders">
             Ryd alle ordrer
         </button>
     }
@@ -99,15 +99,13 @@ else
     private void RemoveFromOrders(Product prod)
     {
         OrderService.RemoveProduct(prod);
-        // Refresh our local copy:
+        // Refresh our local copy so the UI re-renders
         orderedList = OrderService.GetAllOrderedProducts();
-        StateHasChanged();
     }
 
     private void ClearOrders()
     {
-        OrderService.Clear();
+        OrderService.ClearOrders();
         orderedList = OrderService.GetAllOrderedProducts();
-        StateHasChanged();
     }
 }
