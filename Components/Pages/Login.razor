@@ -43,9 +43,24 @@
 </EditForm>
 
 @code {
-    private LoginForm loginForm = new LoginForm();
+    private LoginFormModel loginForm = new LoginFormModel();
 
     private string error = string.Empty;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        if (!Auth.IsAuthenticated)
+        {
+            return;
+        }
+
+        Nav.NavigateTo("/");
+    }
 
     private async Task HandleLogin()
     {

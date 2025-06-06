@@ -2,6 +2,7 @@
 using Projekt.Helpers;
 using Projekt.Models;
 using Projekt.Models.Forms;
+using System.Threading.Tasks;
 
 namespace Projekt.Services
 {
@@ -43,7 +44,7 @@ namespace Projekt.Services
             return user;
         }
 
-        public async Task<User?> Register(RegisterForm registerForm)
+        public async Task<User?> Register(RegisterFormModel registerForm)
         {
             User user = new User()
             {

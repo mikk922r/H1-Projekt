@@ -8,35 +8,7 @@
 
 <PageTitle>Forside</PageTitle>
 
-@* ---------- Success‐besked (vises midt på skærmen) ---------- *@
-@if (!string.IsNullOrEmpty(successMessage))
-{
-    <div class="alert alert-success alert-dismissible fade show"
-         role="alert"
-         style="
-               position: fixed;
-               top: 50%;
-               left: 50%;
-               transform: translate(-50%, -50%);
-               z-index: 1050;
-               width: 80%;
-               max-width: 400px;
-                 ">
-        @successMessage
-        <button type="button"
-                class="btn-close"
-                aria-label="Close"
-                @onclick="ClearMessage"
-                style="position: absolute; top: 8px; right: 8px;">
-        </button>
-    </div>
-}
-
-<div class="row mb-4 align-items-center">
-    <div class="col">
-        <h2>Dashboard</h2>
-    </div>
-</div>
+<h1 class="fs-1 my-4">Dashboard</h1>
 
 <div class="row g-4">
     @if (Auth.IsAuthenticated)
@@ -61,9 +33,11 @@
             <div class="card h-100 border-warning">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">Welcome!</h5>
+
                     <p class="card-text flex-grow-1">
                         You need to be signed in to manage users or add products.
                     </p>
+
                     <NavLink class="btn btn-primary mt-auto" href="/login">Login</NavLink>
                     <NavLink class="btn btn-outline-secondary mt-2" href="/register">Register</NavLink>
                 </div>
@@ -81,7 +55,7 @@
 else
 {
     <div class="d-flex flex-wrap gap-4">
-        @foreach (Product product in products)
+        @foreach (Product product in products.OrderByDescending(p => p.Id))
         {
             <ProductCard product="product" />
         }
@@ -91,45 +65,8 @@ else
 @code {
     private List<Product> products = new List<Product>();
 
-    private string? successMessage;
-
     protected override async Task OnInitializedAsync()
     {
         products = await DBService.GetAllProductsAsync();
-    }
-
-    private void ViewProductDetails(int productId)
-    {
-        Nav.NavigateTo($"/product-details/{productId}");
-    }
-
-    private void AddToOrders(Product p)
-    {
-        if (!Auth.IsAuthenticated)
-        {
-            Nav.NavigateTo("/login");
-            return;
-        }
-
-        OrderService.AddProduct(p);
-
-        // Sæt en kreativ bekræftelses‐besked:
-        successMessage = $"🎉 Fantastisk! \"{p.Name}\" er nu i din kurv!";
-        StateHasChanged();
-
-        // Kald en async helper, der fjerner beskeden efter 3 sekunder
-        _ = ClearSuccessMessageAfterDelay();
-    }
-
-    private async Task ClearSuccessMessageAfterDelay()
-    {
-        await Task.Delay(3000);
-        successMessage = null;
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private void ClearMessage()
-    {
-        successMessage = null;
     }
 }

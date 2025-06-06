@@ -3,7 +3,7 @@
 <div class="d-flex flex-wrap gap-2 px-1">
     @foreach (Colors color in ColorHelper.GetColors())
     {
-        <button type="button" class="btn color @(ColorHelper.GetColorClass(color) + (IsSelected(color) ? " active" : "")) rounded-circle" @onclick="() => ToggleColor(color)"></button>
+        <button type="button" class="btn color @(ColorHelper.GetColorClass(color) + (IsSelected(color) ? " active" : "")) rounded-circle w-2rem h-2rem border border-1 border-default" @onclick="() => ToggleColor(color)"></button>
     }
 </div>
 

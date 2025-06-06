@@ -28,7 +28,34 @@ main {
     padding: 4rem;
 }
 
+@media only screen and (min-width: 1920px) {
+    main {
+        max-width: 1920px;
+        margin: 0 auto;
+    }
+}
+
 /* Ekstra global css */
+
+hr {
+    background-color: rgba(17, 17, 17, 0.15);
+    min-height: 1px;
+    min-width: 1px;
+    border: none;
+    opacity: 1;
+}
+
+.border-default {
+    border-color: rgba(17, 17, 17, 0.15) !important;
+}
+
+button:focus {
+    box-shadow: none;
+}
+
+button.active {
+    box-shadow: 0 0 0 1.6px white, 0 0 0 4px #258cfb;
+}
 
 .w-fit {
     width: fit-content !important;
@@ -50,8 +77,32 @@ main {
     width: 75% !important;
 }
 
+.w-1rem {
+    width: 1rem !important;
+}
+
+.w-2rem {
+    width: 2rem !important;
+}
+
+.min-w-2rem {
+    min-width: 2rem !important;
+}
+
 .h-fit {
     height: fit-content !important;
+}
+
+.h-1rem {
+    height: 1rem !important;
+}
+
+.h-2rem {
+    height: 2rem !important;
+}
+
+.min-h-2rem {
+    min-height: 2rem !important;
 }
 
 .fs-7 {

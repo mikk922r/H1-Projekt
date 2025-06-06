@@ -8,130 +8,20 @@
 
 <PageTitle>Tilføj Produkt</PageTitle>
 
-<div class="d-flex gap-4 mx-auto w-100">
-    <EditForm class="card flex-grow-1 shadow-sm" Model="productForm" OnValidSubmit="HandleSubmit" FormName="AddProduct">
-        <DataAnnotationsValidator />
-
-        <article class="d-flex flex-column gap-3 p-3">
-            <div>
-                <label class="form-label">Navn</label>
-
-                <InputText class="form-control" @bind-Value="productForm.Name" />
-
-                <ValidationMessage For="@(() => productForm.Name)" />
-            </div>
-
-            <div>
-                <label class="form-label">Beskrivelse</label>
-
-                <InputTextArea rows="5" class="form-control" @bind-Value="productForm.Description" />
-
-                <ValidationMessage For="@(() => productForm.Description)" />
-            </div>
-
-            <div>
-                <label class="form-label">Pris</label>
-
-                <InputNumber class="form-control" @bind-Value="productForm.Price" />
-
-                <ValidationMessage For="@(() => productForm.Price)" />
-            </div>
-
-            <div>
-                <label class="form-label">Farve</label>
-
-                <ColorSelector @bind-color="productForm.Color" />
-
-                <ValidationMessage For="@(() => productForm.Color)" />
-            </div>
-
-            <div>
-                <label class="form-label">Størrelse</label>
-
-                <InputText class="form-control" @bind-Value="productForm.Size" />
-
-                <ValidationMessage For="@(() => productForm.Size)" />
-            </div>
-
-            <div>
-                <label class="form-label">Antal</label>
-
-                <InputNumber class="form-control" @bind-Value="productForm.Quantity" />
-
-                <ValidationMessage For="@(() => productForm.Quantity)" />
-            </div>
-
-            <div class="form-check">
-                <InputCheckbox class="form-check-input" @bind-Value="productForm.Used" />
-
-                <label class="form-check-label">Brugt?</label>
-            </div>
-
-            <div>
-                <label class="form-label">Mærke</label>
-
-                <InputSelect class="form-select" @bind-Value="productForm.BrandId">
-                    <option value="">-- Vælg Mærke --</option>
-
-                    @foreach (Brand brand in brands)
-                    {
-                        <option value="@brand.Id">@brand.Name</option>
-                    }
-                </InputSelect>
-            </div>
-
-            <div>
-                <label class="form-label">Kategori</label>
-
-                <InputSelect class="form-select" @bind-Value="productForm.CategoryId">
-                    <option value="">-- Vælg Kategori --</option>
-
-                    @foreach (Category category in categories.Where(c => c.ParentCategoryId is null).OrderBy(x => x.Id))
-                    {
-                        <optgroup label="@category.Name">
-                            @foreach (Category subCategory in categories.Where(sc => sc.ParentCategoryId == category.Id).OrderBy(x => x.Name))
-                            {
-                                <option value="@subCategory.Id">@subCategory.Name</option>
-                            }
-                        </optgroup>
-                    }
-                </InputSelect>
-            </div>
-
-            <div>
-                <label class="form-label">Sælger</label>
-
-                <InputSelect class="form-select" @bind-Value="productForm.UserId" disabled="!Auth.IsAuthenticated">
-                    <option value="">-- Vælg Sælger --</option>
-
-                    @foreach (User user in users)
-                    {
-                        <option value="@user.Id">@user.Name</option>
-                    }
-                </InputSelect>
-            </div>
-
-            <div>
-                <label class="form-label">Upload Image</label>
-
-                <InputFile OnChange="HandleFileSelected" accept="image/*" class="form-control" />
-            </div>
-
-            <button type="submit" class="btn btn-success">Tilføj</button>
-        </article>
-    </EditForm>
+<div class="d-flex gap-4">
+    <div class="card flex-grow-1 shadow-sm p-3">
+        <ProductForm Model="productModel" OnValidSubmit="HandleSubmit" FormName="AddProduct" OnFileSelected="HandleFileSelected" />
+    </div>
 
     <ProductCard product="GetPreviewProduct()" />
 </div>
 
 @code {
-    private ProductForm productForm = new ProductForm();
+    private ProductFormModel productModel = new ProductFormModel();
 
-    private List<Brand> brands = new();
+    private List<Brand> brands = new List<Brand>();
 
-    private List<Category> categories = new();
-
-    private List<User> users = new();
+    private List<Category> categories = new List<Category>();
 
     private IBrowserFile? selectedFile;
 
@@ -142,8 +32,6 @@
         brands = await DB.GetAllBrandsAsync();
 
         categories = await DB.GetAllCategoriesAsync();
-
-        users = await DB.GetAllUsersAsync();
     }
 
     protected override void OnAfterRender(bool firstRender)
@@ -155,7 +43,7 @@
 
         if (Auth.IsAuthenticated)
         {
-            productForm.UserId = Auth.CurrentUser!.Id;
+            productModel.UserId = Auth.CurrentUser!.Id;
 
             return;
         }
@@ -167,19 +55,19 @@
     {
         return new Product
         {
-            Name = !string.IsNullOrEmpty(productForm.Name) ? productForm.Name : "Navn",
-            Description = productForm.Description,
-            Price = productForm.Price,
-            Color = productForm.Color,
-            Size = productForm.Size,
-            Quantity = productForm.Quantity,
-            Used = productForm.Used,
+            Name = !string.IsNullOrEmpty(productModel.Name) ? productModel.Name : "Navn",
+            Description = productModel.Description,
+            Price = productModel.Price,
+            Color = productModel.Color,
+            Size = productModel.Size,
+            Quantity = productModel.Quantity,
+            Used = productModel.Used,
             Image = previewImageUrl,
-            BrandId = productForm.BrandId,
-            CategoryId = productForm.CategoryId,
+            BrandId = productModel.BrandId,
+            CategoryId = productModel.CategoryId,
             UserId = Auth.IsAuthenticated ? Auth.CurrentUser!.Id : 0,
-            BrandName = brands.FirstOrDefault(b => b.Id == productForm.BrandId)?.Name ?? "Mærke",
-            CategoryName = categories.FirstOrDefault(c => c.Id == productForm.CategoryId)?.Name ?? "Kategori",
+            BrandName = brands.FirstOrDefault(b => b.Id == productModel.BrandId)?.Name ?? "Mærke",
+            CategoryName = categories.FirstOrDefault(c => c.Id == productModel.CategoryId)?.Name ?? "Kategori",
             UserName = Auth.IsAuthenticated ? Auth.CurrentUser!.Name : "Sælger",
         };
     }
@@ -214,7 +102,7 @@
 
             previewImageUrl = $"data:{file.ContentType};base64,{base64}";
         }
-        catch 
+        catch
         {
             return;
         }
@@ -243,15 +131,15 @@
 
                 await selectedFile.OpenReadStream(2 * 1024 * 1024).CopyToAsync(fileStream);
 
-                productForm.Image = Path.Combine("uploads", uniqueFileName).Replace("\\", "/");
+                productModel.Image = Path.Combine("uploads", uniqueFileName).Replace("\\", "/");
             }
-            catch 
+            catch
             {
                 return;
             }
         }
 
-        int? id = await DB.AddProductAsync(productForm.ToEntity());
+        int? id = await DB.AddProductAsync(productModel.ToEntity());
 
         if (id is null)
         {

@@ -15,6 +15,13 @@ namespace Projekt.Services
             OnCartChanged(_cart);
         }
 
+        public void AddToCart(IEnumerable<Product> products)
+        {
+            _cart.AddRange(products);
+
+            OnCartChanged(_cart);
+        }
+
         public void RemoveFromCart(Product item)
         {
             _cart.Remove(item);
