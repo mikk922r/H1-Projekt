@@ -40,14 +40,7 @@
             <div>
                 <label class="form-label">Farve</label>
 
-                <InputSelect class="form-select" @bind-Value="productForm.Color">
-                    <option value="">-- Vælg Farve --</option>
-
-                    @foreach (Colors color in ColorHelper.GetColors())
-                    {
-                        <option value="@color">@ColorHelper.GetColorName(color)</option>
-                    }
-                </InputSelect>
+                <ColorSelector @bind-color="productForm.Color" />
 
                 <ValidationMessage For="@(() => productForm.Color)" />
             </div>

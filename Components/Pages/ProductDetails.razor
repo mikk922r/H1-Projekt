@@ -260,8 +260,8 @@
     private bool saveSuccess = false;
     private bool saveFailure = false;
 
-    private List<Brand> categories = new();
-    private List<Category> brands = new();
+    private List<Category> categories = new();
+    private List<Brand> brands = new();
 
     private string? successMessage;
 
@@ -298,8 +298,8 @@
             Image = product.Image
         };
 
-        categories = await DB.GetAllBrandsAsync();
-        brands = await DB.GetAllCategoriesAsync();
+        categories = await DB.GetAllCategoriesAsync();
+        brands = await DB.GetAllBrandsAsync();
 
         isLoading = false;
     }

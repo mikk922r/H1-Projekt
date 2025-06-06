@@ -13,7 +13,7 @@
         <h5>@minPrice.ToString("C", CultureInfo.CurrentCulture) - @maxPrice.ToString("C", CultureInfo.CurrentCulture)</h5>
     </div>
 
-    <DoubleRange min="0" max="100000" step="100" firstValue="@minPrice" firstValueChanged="(value) => minPriceChanged.InvokeAsync(value)" secondValue="@maxPrice" secondValueChanged="(value) => maxPriceChanged.InvokeAsync(value)" />
+    <DoubleRange min="0" max="100000" step="100" firstValue="minPrice" firstValueChanged="(value) => minPriceChanged.InvokeAsync(value)" secondValue="maxPrice" secondValueChanged="(value) => maxPriceChanged.InvokeAsync(value)" />
 
     <hr class="my-3" />
 
@@ -49,12 +49,7 @@
 
     <h5 class="mb-2">Farver</h5>
 
-    <div class="d-flex flex-wrap gap-2 px-1">
-        @foreach (Colors color in ColorHelper.GetColors())
-        {
-            <button type="button" class="btn color @(ColorHelper.GetColorClass(color) + (colors.Contains(color) ? " active" : "")) rounded-circle" @onclick="() => ToggleColor(color)"></button>
-        }
-    </div>
+    <ColorSelector colors="colors" colorsChanged="(value) => colorsChanged.InvokeAsync(value)" />
 </div>
 
 @code {
@@ -139,20 +134,6 @@
         }
 
         sizesChanged.InvokeAsync(sizes);
-    }
-
-    private void ToggleColor(Colors color)
-    {
-        if (colors.Contains(color))
-        {
-            colors.Remove(color);
-        }
-        else
-        {
-            colors.Add(color);
-        }
-
-        colorsChanged.InvokeAsync(colors);
     }
 }
 

@@ -14,14 +14,14 @@
     <div class="alert alert-success alert-dismissible fade show"
          role="alert"
          style="
-           position: fixed;
-           top: 50%;
-           left: 50%;
-           transform: translate(-50%, -50%);
-           z-index: 1050;
-           width: 80%;
-           max-width: 400px;
-             ">
+               position: fixed;
+               top: 50%;
+               left: 50%;
+               transform: translate(-50%, -50%);
+               z-index: 1050;
+               width: 80%;
+               max-width: 400px;
+                 ">
         @successMessage
         <button type="button"
                 class="btn-close"
@@ -72,86 +72,29 @@
     }
 </div>
 
-@* --------------------------------------- *@
-@* Display all Products below *@
-@* --------------------------------------- *@
+<h1 class="fs-1 my-4">Nyeste Produkter</h1>
 
-@if (products is not null && products.Any())
+@if (!products.Any())
 {
-    <h3 class="mt-5">All Products</h3>
-    <div class="row row-cols-1 row-cols-md-3 g-4 mt-2">
-        @foreach (var p in products)
-        {
-            <div class="col">
-                <div class="card h-100 shadow-sm">
-                    @* Hvis et billede findes… *@
-                    @if (!string.IsNullOrWhiteSpace(p.Image))
-                    {
-                        <img src="@p.Image"
-                             class="card-img-top"
-                             alt="Image of @p.Name"
-                             style="object-fit: cover; height: 200px;" />
-                    }
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">@p.Name</h5>
-
-                        <p class="card-text flex-grow-1">
-                            @if (!string.IsNullOrWhiteSpace(p.Description))
-                            {
-                                @p.Description
-                            }
-                            else
-                            {
-                                <em>No description.</em>
-                            }
-                        </p>
-
-                        <p class="mb-2"><strong>Pris:</strong> @string.Format("{0:C}", p.Price)</p>
-
-                        <p class="mb-2">
-                            <strong>Antal:</strong> @p.Quantity
-                            @if (p.Used)
-                            {
-                                <span class="badge bg-secondary">Brugt</span>
-                            }
-                        </p>
-
-                        <p class="mb-2"><strong>Mærke:</strong> @(!string.IsNullOrWhiteSpace(p.BrandName) ? p.BrandName : "—")</p>
-                        <p class="mb-2"><strong>Kategori:</strong> @(!string.IsNullOrWhiteSpace(p.CategoryName) ? p.CategoryName : "—")</p>
-                        <p class="mb-2">
-                            <strong>Sælger:</strong> @(!string.IsNullOrWhiteSpace(p.UserName) ? p.UserName : "—")
-                        </p>
-
-                        <div class="mt-auto d-flex justify-content-between">
-                            <button class="btn btn-outline-primary"
-                                    @onclick="() => ViewProductDetails(p.Id)">
-                                Vis detaljer
-                            </button>
-                            <button class="btn btn-success"
-                                    @onclick="() => AddToOrders(p)">
-                                Bestil
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
+    <p class="m-auto fs-3 fw-semibold">Kunne ikke finde nogle produkter...</p>
 }
-else if (products is not null)
+else
 {
-    <div class="alert alert-info text-center mt-5">
-        Ingen produkter endnu.. Tryk på "Sælg" for at oprette en annonce!
+    <div class="d-flex flex-wrap gap-4">
+        @foreach (Product product in products)
+        {
+            <ProductCard product="product" />
+        }
     </div>
 }
 
 @code {
-    private List<Product>? products;
+    private List<Product> products = new List<Product>();
+
     private string? successMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        // Load all products as soon as Home loads
         products = await DBService.GetAllProductsAsync();
     }
 
