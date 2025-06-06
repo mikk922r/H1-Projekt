@@ -1,0 +1,136 @@
+﻿@rendermode InteractiveServer
+@inherits BasePage
+
+@inject DBService DBService
+
+<EditForm class="d-flex flex-column gap-3" Model="Model" OnValidSubmit="OnValidSubmit" FormName="@FormName">
+    <DataAnnotationsValidator />
+
+    <div>
+        <label class="form-label">Navn</label>
+
+        <InputText class="form-control" @bind-Value="Model.Name" />
+
+        <ValidationMessage For="@(() => Model.Name)" />
+    </div>
+
+    <div>
+        <label class="form-label">Beskrivelse</label>
+
+        <InputTextArea rows="5" class="form-control" @bind-Value="Model.Description" />
+
+        <ValidationMessage For="@(() => Model.Description)" />
+    </div>
+
+    <div>
+        <label class="form-label">Pris</label>
+
+        <InputNumber class="form-control" @bind-Value="Model.Price" />
+
+        <ValidationMessage For="@(() => Model.Price)" />
+    </div>
+
+    <div>
+        <label class="form-label">Farve</label>
+
+        <ColorSelector @bind-color="Model.Color" />
+
+        <ValidationMessage For="@(() => Model.Color)" />
+    </div>
+
+    <div>
+        <label class="form-label">Størrelse</label>
+
+        <InputText class="form-control" @bind-Value="Model.Size" />
+
+        <ValidationMessage For="@(() => Model.Size)" />
+    </div>
+
+    <div>
+        <label class="form-label">Antal</label>
+
+        <InputNumber class="form-control" @bind-Value="Model.Quantity" />
+
+        <ValidationMessage For="@(() => Model.Quantity)" />
+    </div>
+
+    <div class="form-check">
+        <InputCheckbox class="form-check-input" @bind-Value="Model.Used" />
+
+        <label class="form-check-label">Brugt?</label>
+    </div>
+
+    <div>
+        <label class="form-label">Mærke</label>
+
+        <InputSelect class="form-select" @bind-Value="Model.BrandId">
+            <option value="">-- Vælg Mærke --</option>
+
+            @foreach (Brand brand in brands)
+            {
+                <option value="@brand.Id">@brand.Name</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div>
+        <label class="form-label">Kategori</label>
+
+        <InputSelect class="form-select" @bind-Value="Model.CategoryId">
+            <option value="">-- Vælg Kategori --</option>
+
+            @foreach (Category category in categories.Where(c => c.ParentCategoryId is null).OrderBy(x => x.Id))
+            {
+                <optgroup label="@category.Name">
+                    @foreach (Category subCategory in categories.Where(sc => sc.ParentCategoryId == category.Id).OrderBy(x => x.Name))
+                    {
+                        <option value="@subCategory.Id">@subCategory.Name</option>
+                    }
+                </optgroup>
+            }
+        </InputSelect>
+    </div>
+
+    @if (OnFileSelected.HasDelegate)
+    {
+        <div>
+            <label class="form-label">Upload Image</label>
+
+            <InputFile OnChange="OnFileSelected" accept="image/*" class="form-control" />
+        </div>
+    }
+
+    @if (FormName == "AddProduct")
+    {
+        <button type="submit" class="btn btn-success">Tilføj</button>
+    }
+    else
+    {
+        <button type="submit" class="btn btn-success">Gem</button>
+    }
+</EditForm>
+
+@code {
+    [Parameter]
+    public ProductFormModel Model { get; set; } = new ProductFormModel();
+
+    [Parameter]
+    public EventCallback<EditContext> OnValidSubmit { get; set; }
+
+    [Parameter]
+    public string? FormName { get; set; }
+
+    [Parameter]
+    public EventCallback<InputFileChangeEventArgs> OnFileSelected { get; set; }
+
+    private List<Brand> brands = new List<Brand>();
+
+    private List<Category> categories = new List<Category>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        brands = await DBService.GetAllBrandsAsync();
+
+        categories = await DBService.GetAllCategoriesAsync();
+    }
+}

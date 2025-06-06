@@ -2,287 +2,242 @@
 @rendermode InteractiveServer
 @inherits BasePage
 
-@inject DBService DB
+@inject DBService DBService
 @inject NavigationManager Nav
 @inject OrderService OrderService
 
 <PageTitle>Produkt @ProductId</PageTitle>
 
-@* ---------- Success‐besked (kun når successMessage != null) ---------- *@
-@if (!string.IsNullOrEmpty(successMessage))
+@if (product is not null)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @successMessage
-        <button type="button" class="btn-close" aria-label="Close" @onclick="() => ClearMessage()"></button>
-    </div>
-}
+    <div class="d-flex flex-column gap-3 w-75 mx-auto">
+        <div class="d-flex justify-content-between">
+            <button class="btn btn-outline-secondary" @onclick="NavigateBack">Tilbage</button>
 
-<div class="container py-4">
+            @if (Auth.IsAuthenticated && Auth.CurrentUser!.Id == product.UserId)
+            {
+                <button class="btn btn-warning h-fit" @onclick="ToggleEditMode">@(editMode ? "Annullér redigering" : "Rediger produkt")</button>
+            }
+        </div>
 
-    @if (isLoading)
-    {
-        <div class="text-center my-5">
-            <div class="spinner-border text-primary" role="status"></div>
-            <p class="mt-2">Indlæser produktdetaljer…</p>
-        </div>
-    }
-    else if (product is null)
-    {
-        <div class="alert alert-danger text-center">
-            <h4 class="alert-heading">Produkt ikke fundet</h4>
-            <p>Der findes ikke noget produkt med ID <strong>@ProductId</strong> i databasen.</p>
-            <button class="btn btn-outline-secondary" @onclick="NavigateHome">
-                Tilbage til forsiden
-            </button>
-        </div>
-    }
-    else
-    {
-        <div class="row mb-4">
-            <div class="col">
-                <h2>Produktdetaljer: <span class="text-primary">@product.Name</span></h2>
-                <p class="text-muted">Produkt-ID: @product.Id</p>
-            </div>
-            <div class="col-auto">
-                @if (isOwner)
+        <div class="d-flex gap-4">
+            <ImageShowcase images="GetImages()" />
+
+            <div class="d-flex flex-column w-50 gap-4">
+                @if (editMode)
                 {
-                    <button class="btn btn-warning me-2" @onclick="ToggleEditMode">
-                        @if (editMode)
-                        {
-                            <span>Annullér redigering</span>
-                        }
-                        else
-                        {
-                            <span>Rediger produkt</span>
-                        }
-                    </button>
-                }
-                <button class="btn btn-outline-secondary" @onclick="NavigateHome">
-                    Tilbage
-                </button>
-            </div>
-        </div>
+                    <ProductForm Model="editProduct" OnValidSubmit="HandleValidSubmit" FormName="EditProduct" />
+                } 
+                else
+                {
+                    <div>
+                        <div class="d-flex gap-2 align-items-center">
+                            <span class="w-1rem h-1rem color @(ColorHelper.GetColorClass(product.Color)) rounded-circle"></span>
 
-        @* ------------------------------------------- *@
-        @* LÆSE-KUN VISNING *@
-        @* ------------------------------------------- *@
-        @if (!editMode)
-        {
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title mb-3">@product.Name</h5>
+                            <p class="text-body-seconday fs-7">@product.BrandName <span class="opacity-25">•</span> @product.CategoryName</p>
+                        </div>
 
-                            @if (!string.IsNullOrWhiteSpace(product.Image))
-                            {
-                                <div class="text-center mb-3">
-                                    <img src="@product.Image"
-                                         alt="Billede af @product.Name"
-                                         class="img-fluid rounded"
-                                         style="max-height: 300px; object-fit: contain;" />
-                                </div>
-                            }
+                        <h1 class="fs-2 fw-semibold mt-1 pb-1">@product.Name</h1>
 
-                        <p class="card-text"><strong>Beskrivelse:</strong></p>
-                        <p>
-                            @(string.IsNullOrWhiteSpace(product.Description)
-                                                    ? (MarkupString)"<em>Ingen beskrivelse er angivet.</em>"
-                                                    : product.Description)
-                    </p>
-                    <hr />
-                    <p><strong>Pris:</strong> @string.Format("{0:C}", product.Price)</p>
-                    <p>
-                        <strong>Farve:</strong>
-                        @(string.IsNullOrWhiteSpace(ColorHelper.GetColorName(product.Color)) ? "—" : ColorHelper.GetColorName(product.Color))
-                    </p>
-                    <p>
-                        <strong>Størrelse:</strong>
-                        @(string.IsNullOrWhiteSpace(product.Size) ? "—" : product.Size)
-                    </p>
-                    <p>
-                        <strong>Antal:</strong> @product.Quantity
-                        @if (product.Used)
-                                {
-                                    <span class="badge bg-secondary ms-2">Brugt</span>
-                                }
-                            </p>
-                            <hr />
-                            <p><strong>Mærke:</strong> @product.BrandName</p>
-                            <p><strong>Kategori:</strong> @product.CategoryName</p>
-                            <p>
-                                <strong>Sælger:</strong>
-                                @(string.IsNullOrWhiteSpace(product.UserName) ? "—" : product.UserName)
-                            </p>
+                        @* <div class="d-flex align-items-center gap-2 mt-2">
+                            <StarRating rating="4" readOnly />
 
-                            @* ----------------------------- *@
-                            @* “Bestil” button: *@
-                            @* ----------------------------- *@
-                            <div class="mt-4">
-                                <button class="btn btn-success" @onclick="HandleBestil">
-                                    Bestil
-                                </button>
+                            <span class="fs-7">4.2 (42 reviews)</span>
+                        </div> *@
+                    </div>
+
+                    <h2 class="fw-semibold fs-3">@product.Price.ToString("C", CultureInfo.CurrentCulture)</h2>
+
+                    <div>
+                        <p class="text-body-seconday mb-2">@product.Description</p>
+
+                        <div class="d-flex align-items-center gap-2 fs-7">
+                            <div class="d-flex align-items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="text-success" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
+                                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"></path>
+                                </svg>
+
+                                <span>På lager</span>
+                            </div>
+
+                            <hr class="h-1rem" />
+
+                            <div class="d-flex align-items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
+                                    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                                        <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2m10 0H9m10 0h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path>
+                                        <circle cx="17" cy="18" r="2"></circle>
+                                        <circle cx="7" cy="18" r="2"></circle>
+                                    </g>
+                                </svg>
+
+                                <span>Gratis fragt</span>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-md-6">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Yderligere info</h5>
-                            <p class="card-text">
-                                Her kan du vise logs, analyser eller kundeanmeldelser.
-                            </p>
-                            <p class="text-muted small">[f.eks. relaterede varer, brugerfeedback osv.]</p>
+                    <div>
+                        <label class="mb-2">Farve:</label>
+
+                        <ColorSelector @bind-color="editProduct.Color" />
+                    </div>
+
+                    <div>
+                        <label>Størrelse:</label>
+
+                        <div class="d-flex">
+
                         </div>
                     </div>
-                </div>
-            </div>
-        }
 
-        @* ------------------------------------------- *@
-        @* REDIGERINGSFORMULAR *@
-        @* ------------------------------------------- *@
-        @if (editMode && isOwner)
-        {
-            <div class="card mt-4 shadow-sm">
-                <div class="card-body">
-                    <h4 class="card-title mb-3">Redigér produkt</h4>
-                    <EditForm Model="editProduct" OnValidSubmit="HandleValidSubmit">
-                        <DataAnnotationsValidator />
-                        <ValidationSummary />
+                    <div>
+                        <label>Antal:</label>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Navn</label>
-                                <InputText class="form-control" @bind-Value="editProduct.Name" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Pris</label>
-                                <InputNumber class="form-control" @bind-Value="editProduct.Price" />
-                            </div>
-                        </div>
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary d-flex align-items-center" @onclick="() => amount = Math.Max(1, amount - 1)">
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
+                                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"></path>
+                                </svg>
+                            </button>
 
-                        <div class="mb-3">
-                            <label class="form-label">Beskrivelse</label>
-                            <InputTextArea class="form-control" rows="3" @bind-Value="editProduct.Description" />
-                        </div>
+                            <InputNumber class="form-control w-25 flex-grow-0" @bind-Value="amount" min="1" max="100" step="1" />
 
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Farve</label>
-                                <InputSelect class="form-select" @bind-Value="editProduct.Color">
-                                    <option value="">-- vælg farve --</option>
-                                    @foreach (Colors color in ColorHelper.GetColors())
-                                    {
-                                        <option value="@color">@ColorHelper.GetColorName(color)</option>
-                                    }
-                                </InputSelect>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Størrelse</label>
-                                <InputText class="form-control" @bind-Value="editProduct.Size" />
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Antal</label>
-                                <InputNumber class="form-control" @bind-Value="editProduct.Quantity" />
-                            </div>
-                        </div>
-
-                        <div class="form-check mb-3">
-                            <InputCheckbox class="form-check-input" @bind-Value="editProduct.Used" />
-                            <label class="form-check-label">Brugt?</label>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Mærke</label>
-                                <InputSelect class="form-select" @bind-Value="editProduct.BrandId">
-                                    <option value="">-- vælg mærke --</option>
-                                    @foreach (var b in brands)
-                                    {
-                                        <option value="@b.Id">@b.Name</option>
-                                    }
-                                </InputSelect>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Kategori</label>
-                                <InputSelect class="form-select" @bind-Value="editProduct.CategoryId">
-                                    <option value="">-- vælg kategori --</option>
-                                    @foreach (var c in categories)
-                                    {
-                                        <option value="@c.Id">@c.Name</option>
-                                    }
-                                </InputSelect>
-                            </div>
-                        </div>
-
-                        <div class="mt-4">
-                            <button type="submit" class="btn btn-primary me-2">Gem ændringer</button>
-                            <button type="button" class="btn btn-outline-secondary" @onclick="CancelEdit">
-                                Annuller
+                            <button class="btn btn-outline-secondary d-flex align-items-center" @onclick="() => amount = Math.Min(100, amount + 1)">
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
+                                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7v14"></path>
+                                </svg>
                             </button>
                         </div>
-                    </EditForm>
-                </div>
-            </div>
-        }
+                    </div>
 
-        @* ------------------------------------------- *@
-        @* GEM-RESULTAT Meddelelser *@
-        @* ------------------------------------------- *@
-        @if (saveSuccess)
-        {
-            <div class="alert alert-success mt-4" role="alert">
-                <strong>Succes!</strong> Produktet er blevet opdateret.
+                    <div class="d-flex mt-auto">
+                        <button class="btn btn-primary d-flex align-items-center justify-content-center gap-2 w-100" @onclick="AddToCart">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" focusable="false" width="20" height="20" viewBox="0 0 24 24">
+                                <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                                    <circle cx="8" cy="21" r="1"></circle>
+                                    <circle cx="19" cy="21" r="1"></circle>
+                                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                                </g>
+                            </svg>
+
+                            Læg i kurv
+                        </button>
+                    </div>
+
+                    <div class="pt-3 border-top border-1 border-default d-flex gap-4 align-items-center fs-7">
+                        <div class="d-flex align-items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
+                                <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                                    <path d="M21 12a9 9 0 0 0-9-9a9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                                    <path d="M3 3v5h5m-5 4a9 9 0 0 0 9 9a9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                                    <path d="M16 16h5v5"></path>
+                                </g>
+                            </svg>
+
+                            <span>30 dages returret</span>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
+                                <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+                            </svg>
+
+                            <span>2 års garanti</span>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
+                                <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                                    <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                                    <path d="M2 10h20"></path>
+                                </g>
+                            </svg>
+
+                            <span>Sikker betaling</span>
+                        </div>
+                    </div>
+                }
             </div>
-        }
-        @if (saveFailure)
-        {
-            <div class="alert alert-danger mt-4" role="alert">
-                <strong>Ups!</strong> Noget gik galt. Prøv venligst igen.
-            </div>
-        }
-    }
-</div>
+        </div>
+    </div>
+}
 
 @code {
     [Parameter]
     public int ProductId { get; set; }
 
     private Product? product;
-    private Product editProduct = new();
-    private bool isOwner = false;
+
+    private int amount = 1;
+
+    private ProductFormModel editProduct = new ProductFormModel();
+
     private bool editMode = false;
-    private bool isLoading = true;
 
-    private bool saveSuccess = false;
-    private bool saveFailure = false;
-
-    private List<Brand> categories = new();
-    private List<Category> brands = new();
-
-    private string? successMessage;
+    private List<Category> categories = new();
+    private List<Brand> brands = new();
 
     protected override async Task OnInitializedAsync()
     {
-        // Indlæs produktet inkl. brand/category/user-navne
-        product = await DB.GetProductByIdAsync(ProductId);
+        product = await DBService.GetProductByIdAsync(ProductId);
+        categories = await DBService.GetAllCategoriesAsync();
+        brands = await DBService.GetAllBrandsAsync();
+    }
+
+    private List<string> GetImages()
+    {
         if (product is null)
         {
-            isLoading = false;
+            return new List<string>();
+        }
+
+        return new List<string>
+        {
+            product.Image ?? "/uploads/placeholder1.jpg",
+            "/uploads/placeholder2.jpg",
+            "/uploads/placeholder3.jpg",
+            "/uploads/placeholder4.jpg",
+            "/uploads/placeholder5.jpg"
+        };
+    }
+
+    private void AddToCart()
+    {
+        if (product is null)
+        {
             return;
         }
 
-        // Tjek ejerskab
-        if (Auth.IsAuthenticated && Auth.CurrentUser != null)
+        CartService.AddToCart(Enumerable.Range(0, amount).Select(i => product));
+    }
+
+    private void NavigateBack()
+    {
+        int? categoryId = categories.FirstOrDefault(c => c.Id == product?.CategoryId)?.ParentCategoryId;
+
+        if (!categoryId.HasValue)
         {
-            isOwner = (product.UserId == Auth.CurrentUser.Id);
+            return;
+        } 
+
+        Nav.NavigateTo($"/products/{categoryId}");
+    }
+
+    private void ToggleEditMode()
+    {
+        if (product is null)
+        {
+            return;
         }
 
-        // Kopiér til editProduct for redigérings‐formularen
-        editProduct = new Product
+        editMode = !editMode;
+
+        if (!editMode)
+        {
+            return;
+        }
+
+        editProduct = new ProductFormModel
         {
             Id = product.Id,
             Name = product.Name,
@@ -292,138 +247,41 @@
             Size = product.Size,
             Quantity = product.Quantity,
             Used = product.Used,
+            Image = product.Image,
             BrandId = product.BrandId,
             CategoryId = product.CategoryId,
-            UserId = product.UserId,
-            Image = product.Image
+            UserId = product.UserId
         };
-
-        categories = await DB.GetAllBrandsAsync();
-        brands = await DB.GetAllCategoriesAsync();
-
-        isLoading = false;
-    }
-
-    private void HandleBestil()
-    {
-        if (!Auth.IsAuthenticated)
-        {
-            Nav.NavigateTo("/login");
-            return;
-        }
-
-        if (product != null)
-        {
-            OrderService.AddProduct(product);
-
-            // Kreativ bekræftelses‐besked:
-            successMessage = $"🛒 Hurra! \"{product.Name}\" er lagt i kurven.";
-            StateHasChanged();
-
-            _ = Task.Run(async () =>
-            {
-                await Task.Delay(3000);
-                successMessage = null;
-                await InvokeAsync(StateHasChanged);
-            });
-        }
-    }
-
-    private void ToggleEditMode()
-    {
-        saveSuccess = false;
-        saveFailure = false;
-        editMode = !editMode;
-
-        if (editMode && product != null)
-        {
-            editProduct = new Product
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Color = product.Color,
-                Size = product.Size,
-                Quantity = product.Quantity,
-                Used = product.Used,
-                BrandId = product.BrandId,
-                CategoryId = product.CategoryId,
-                UserId = product.UserId,
-                Image = product.Image
-            };
-        }
-    }
-
-    private void CancelEdit()
-    {
-        if (product != null)
-        {
-            editProduct = new Product
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Color = product.Color,
-                Size = product.Size,
-                Quantity = product.Quantity,
-                Used = product.Used,
-                BrandId = product.BrandId,
-                CategoryId = product.CategoryId,
-                UserId = product.UserId,
-                Image = product.Image
-            };
-        }
-        saveSuccess = false;
-        saveFailure = false;
-        editMode = false;
     }
 
     private async Task HandleValidSubmit()
     {
-        saveSuccess = false;
-        saveFailure = false;
+        var ok = await DBService.UpdateProductAsync(editProduct.ToEntity());
 
-        // Gem ændringer (billedet forbliver uændret)
-        var ok = await DB.UpdateProductAsync(editProduct);
-        if (ok)
+        if (!ok)
         {
-            product = new Product
-            {
-                Id = editProduct.Id,
-                Name = editProduct.Name,
-                Description = editProduct.Description,
-                Price = editProduct.Price,
-                Color = editProduct.Color,
-                Size = editProduct.Size,
-                Quantity = editProduct.Quantity,
-                Used = editProduct.Used,
-                BrandId = editProduct.BrandId,
-                CategoryId = editProduct.CategoryId,
-                UserId = editProduct.UserId,
-                Image = editProduct.Image,
-                BrandName = product.BrandName,
-                CategoryName = product.CategoryName,
-                UserName = product.UserName
-            };
-
-            saveSuccess = true;
-            editMode = false;
+            return;
         }
-        else
+
+        product = new Product
         {
-            saveFailure = true;
-        }
-    }
+            Id = product!.Id,
+            Name = editProduct.Name,
+            Description = editProduct.Description,
+            Price = editProduct.Price,
+            Color = editProduct.Color,
+            Size = editProduct.Size,
+            Quantity = editProduct.Quantity,
+            Used = editProduct.Used,
+            Image = editProduct.Image,
+            BrandId = editProduct.BrandId,
+            CategoryId = editProduct.CategoryId,
+            UserId = editProduct.UserId,
+            BrandName = product.BrandName,
+            CategoryName = product.CategoryName,
+            UserName = product.UserName
+        };
 
-    private void NavigateHome()
-    {
-        Nav.NavigateTo("/");
-    }
-
-    private void ClearMessage()
-    {
-        successMessage = null;
+        editMode = false;
     }
 }

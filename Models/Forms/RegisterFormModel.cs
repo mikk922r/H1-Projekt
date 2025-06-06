@@ -2,7 +2,7 @@
 
 namespace Projekt.Models.Forms
 {
-    public class RegisterForm : IUser
+    public class RegisterFormModel : IUser
     {
         [Required(ErrorMessage = "Navn er påkrævet")]
         [MinLength(2, ErrorMessage = "Navn skal være mindst 2 tegn langt")]

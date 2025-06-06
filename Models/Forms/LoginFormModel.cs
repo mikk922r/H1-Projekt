@@ -2,7 +2,7 @@
 
 namespace Projekt.Models.Forms
 {
-    public class LoginForm
+    public class LoginFormModel
     {
         [Required(ErrorMessage = "Email er påkrævet")]
         [EmailAddress(ErrorMessage = "Email skal være gyldig")]

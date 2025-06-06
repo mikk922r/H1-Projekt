@@ -2,8 +2,10 @@
 
 namespace Projekt.Models.Forms
 {
-    public class ProductForm : IProduct
+    public class ProductFormModel : IProduct
     {
+        public int? Id { get; set; }
+
         [Required(ErrorMessage = "Navn er påkrævet")]
         public string Name { get; set; } = string.Empty;
 
@@ -45,6 +47,7 @@ namespace Projekt.Models.Forms
         {
             return new Product
             {
+                Id = Id ?? 0,
                 Name = Name,
                 Description = Description,
                 Price = Price,
