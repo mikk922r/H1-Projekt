@@ -47,6 +47,7 @@ namespace Projekt.Models.Forms
         {
             return new Product
             {
+                Id = Id ?? 0,
                 Name = Name,
                 Description = Description,
                 Price = Price,
