@@ -1,4 +1,5 @@
-﻿using Projekt.Helpers;
+﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Projekt.Helpers;
 using Projekt.Models;
 using Projekt.Models.Forms;
 
@@ -7,10 +8,12 @@ namespace Projekt.Services
     public class AuthenticationService
     {
         private readonly DBService _dBService;
+        private readonly ProtectedSessionStorage _protectedSessionStorage;
 
-        public AuthenticationService(DBService dBService)
+        public AuthenticationService(DBService dBService, ProtectedSessionStorage protectedSessionStorage)
         {
             _dBService = dBService;
+            _protectedSessionStorage = protectedSessionStorage;
         }
 
         public event EventHandler<User?> OnCurrentUserHasChanged;
@@ -34,6 +37,8 @@ namespace Projekt.Services
             }
 
             SetCurrentUser(user);
+
+            await _protectedSessionStorage.SetAsync("currentUser", user);
 
             return user;
         }
@@ -61,7 +66,29 @@ namespace Projekt.Services
             return user;
         }
 
-        public void SignOut() => SetCurrentUser(null);
+        public async Task SignOut()
+        {
+            SetCurrentUser(null);
+
+            await _protectedSessionStorage.DeleteAsync("currentUser");
+        }
+
+        public async Task CheckSessionStorage()
+        {
+            ProtectedBrowserStorageResult<User> user = await _protectedSessionStorage.GetAsync<User>("currentUser");
+
+            if (!user.Success)
+            {
+                return;
+            }
+
+            if (user.Value is null)
+            {
+                return;
+            }
+
+            SetCurrentUser(user.Value);
+        }
 
         protected virtual void OnCurrentUserChanged(User? e)
         {

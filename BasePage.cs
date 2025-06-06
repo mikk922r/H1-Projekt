@@ -20,6 +20,18 @@ namespace Projekt
             CartService.OnCartHasChanged += OnCartChanged;
         }
 
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            await base.OnAfterRenderAsync(firstRender);
+
+            if (!firstRender)
+            {
+                return;
+            }
+
+            await Auth.CheckSessionStorage();
+        }
+
         private void OnCurrentUserChanged(object? sender, User? user) => InvokeAsync(StateHasChanged);
         private void OnCartChanged(object? sender, List<Product> products) => InvokeAsync(StateHasChanged);
 

@@ -117,9 +117,9 @@
         categories = await DBService.GetAllCategoriesAsync();
     }
 
-    private void LogOut()
+    private async Task LogOut()
     {
-        Auth.SignOut();
+        await Auth.SignOut();
 
         Nav.NavigateTo("/login");
     }
