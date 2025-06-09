@@ -8,11 +8,3 @@ footer > div:last-child {
     margin-top: 2rem;
     max-width: 80rem;
 }
-
-    footer > div:last-child a {
-        transition: background-color 0.25s ease-in-out;
-    }
-
-        footer > div:last-child a:hover {
-            background-color: rgba(17, 17, 17, 0.15);
-        }

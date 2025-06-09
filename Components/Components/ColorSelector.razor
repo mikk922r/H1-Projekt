@@ -1,9 +1,7 @@
-﻿@inject DBService DBService
-
-<div class="d-flex flex-wrap gap-2 px-1">
-    @foreach (Colors color in ColorHelper.GetColors())
+﻿<div class="d-flex flex-wrap gap-2 px-1">
+    @foreach (Colors color in availableColors)
     {
-        <button type="button" class="btn color @(ColorHelper.GetColorClass(color) + (IsSelected(color) ? " active" : "")) rounded-circle w-2rem h-2rem border border-1 border-default" @onclick="() => ToggleColor(color)"></button>
+        <button type="button" class="color @(ColorHelper.GetColorClass(color) + (colors.Contains(color) ? " active" : "")) rounded-circle w-2rem h-2rem border border-1 border-default" @onclick="() => ToggleColor(color)"></button>
     }
 </div>
 
@@ -14,34 +12,28 @@
     [Parameter]
     public EventCallback<List<Colors>> colorsChanged { get; set; }
 
-    [Parameter]
-    public Colors color { get; set; }
+    [Parameter] 
+    public List<Colors> availableColors { get; set; } = ColorHelper.GetColors();
 
     [Parameter]
-    public EventCallback<Colors> colorChanged { get; set; }
+    public bool single { get; set; } = false;
 
     private void ToggleColor(Colors value)
     {
-        if (colorChanged.HasDelegate)
+        if (single)
         {
-            color = value;
+            colors.Clear();
+        }
 
-            colorChanged.InvokeAsync(color);
+        if (colors.Contains(value))
+        {
+            colors.Remove(value);
         }
         else
         {
-            if (colors.Contains(value))
-            {
-                colors.Remove(value);
-            }
-            else
-            {
-                colors.Add(value);
-            }
-
-            colorsChanged.InvokeAsync(colors);
+            colors.Add(value);
         }
-    }
 
-    public bool IsSelected(Colors value) => colors.Contains(value) || color == value;
+        colorsChanged.InvokeAsync(colors);
+    }
 }

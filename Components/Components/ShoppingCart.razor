@@ -1,0 +1,102 @@
+﻿@inherits BasePage
+
+@inject NavigationManager Nav
+@inject OrderService OrderService
+@inject IJSRuntime JS
+
+<ul id="cart" class="dropdown-menu dropdown-menu-end">
+    @if (groupedCart.Count > 0)
+    {
+        <li class="d-flex flex-column gap-2 px-2 mb-2 overflow-y-auto">
+            @foreach (Product product in groupedCart)
+            {
+                <div class="card d-flex flex-row align-items-center justify-content-between gap-2 p-2">
+                    <img src="@product.Image" class="rounded-2 border border-1 border-default" />
+                    
+                    <div class="d-flex flex-column w-100">
+                        <div class="d-flex align-items-center justify-content-between gap-3">
+                            <h4 class="fw-medium">@product.BrandName <span class="opacity-25">•</span> @product.Name</h4>
+
+                            <button type="button" class="d-flex justify-content-center align-items-center rounded-2 text-black fs-7 min-w-2rem min-h-2rem w-2rem h-2rem border-0" @onclick="() => RemoveFromCart(product)">
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
+                                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="fs-7 text-body-secondary d-flex align-items-center gap-1 mb-2">Size: @product.Sizes.First() <span class="opacity-25">•</span> Color: <span class="w-1rem h-1rem color @(ColorHelper.GetColorClass(product.Colors.First())) rounded-circle border border-1 border-default"></span></div>
+
+                        <div class="d-flex align-items-center justify-content-between">
+                            <AmountSelector amount="@GetAmount(product)" amountChanged="(value) => OnAmountChanged(product, value)" />
+
+                            <span class="fw-semibold">@GetPrice(product).ToString("C", CultureInfo.CurrentCulture)</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </li>
+
+        <li class="px-2">
+            <button role="button" class="btn btn-success w-100" @onclick="Order">
+                Gå til kassen
+            </button>
+        </li>
+    } else {
+        <li class="px-2">Der er ingen varer i din indkøbskurv.</li>
+    }
+</ul>
+
+@code {
+    private List<Product> groupedCart => CartService.GetCart().GroupBy(p => GetGroupByProperty(p)).Select(g => g.First()).OrderBy(p => GetGroupByProperty(p)).ToList();
+
+    private int GetAmount(Product product)
+    {
+        return CartService.GetCart().Count(p => GetMatcher(p, product));
+    }
+
+    private decimal GetPrice(Product product)
+    {
+        return CartService.GetCart().Where(p => GetMatcher(p, product)).Sum(p => p.Price);
+    }
+
+    private void OnAmountChanged(Product product, int amount)
+    {
+        List<Product> cart = CartService.GetCart().Where(p => GetMatcher(p, product)).ToList();
+
+        CartService.RemoveFromCart(cart);
+
+        for (int i = 0; i < amount; i++)
+        {
+            CartService.AddToCart(product);
+        }
+    }
+
+    private void RemoveFromCart(Product product)
+    {
+        List<Product> cart = CartService.GetCart().Where(p => GetMatcher(p, product)).ToList();
+
+        CartService.RemoveFromCart(cart);
+    }
+
+    private async Task Order()
+    {
+        List<Product> cart = CartService.GetCart().ToList();
+
+        if (!cart.Any())
+        {
+            return;
+        }
+
+        OrderService.AddProducts(cart);
+
+        CartService.ClearCart();
+
+        await JS.InvokeVoidAsync("closeCart");
+
+        Nav.NavigateTo("/orders");
+    }
+
+    private bool GetMatcher(Product p1, Product p2) => p1.Id == p2.Id && p1.Sizes.First() == p2.Sizes.First() && p1.Colors.First() == p2.Colors.First();
+
+    private string GetGroupByProperty(Product product) => product.Id + product.Sizes.First() + ColorHelper.GetColorName(product.Colors.First());
+}

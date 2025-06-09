@@ -7,22 +7,34 @@
 
 <PageTitle>Produkter</PageTitle>
 
-<div class="d-flex gap-4">
-    <Filter @bind-minPrice="minPrice" @bind-maxPrice="maxPrice" @bind-brands="brands" @bind-sizes="sizes" @bind-colors="colors" />
+<div class="d-flex flex-column gap-4">
+    <div class="d-flex align-items-center justify-content-between gap-4">
+        <h1 class="fs-2">Alle Produkter</h1>
 
-    @if (!products.Where(Filter).Any())
-    {
-        <p class="m-auto fs-3 fw-semibold">Kunne ikke finde nogle produkter...</p>
-    }
-    else
-    {
-        <div class="d-flex flex-wrap gap-4">
-            @foreach (Product product in products.Where(Filter))
-            {
-                <ProductCard product="product" />
-            }
-        </div>
-    }
+        <InputSelect class="form-select w-fit" @bind-Value="sortBy">
+            <option value="newest">Nyeste</option>
+            <option value="price_low_to_high">Pris: Lav til Høj</option>
+            <option value="price_high_to_low">Pris: Høj til Lav</option>
+        </InputSelect>
+    </div>
+
+    <div class="d-flex gap-4">
+        <Filter @bind-minPrice="minPrice" @bind-maxPrice="maxPrice" @bind-brands="brands" @bind-sizes="sizes" @bind-colors="colors" />
+
+        @if (!GetProducts().Any())
+        {
+            <p class="m-auto fs-3 fw-semibold">Kunne ikke finde nogle produkter...</p>
+        }
+        else
+        {
+            <div class="d-flex flex-wrap gap-4">
+                @foreach (Product product in GetProducts())
+                {
+                    <ProductCard product="product" />
+                }
+            </div>
+        }
+    </div>
 </div>
 
 @code {
@@ -42,11 +54,25 @@
 
     private List<Colors> colors = new List<Colors>();
 
+    private string sortBy = "newest";
+
     private List<Product> products = new List<Product>();
 
     protected override async Task OnInitializedAsync()
     {
         products = await DBService.GetAllProductsAsync(categoryId, subCategoryId);
+    }
+
+    private List<Product> GetProducts()
+    {
+        List<Product> filteredProducts = products.Where(Filter).ToList();
+
+        return sortBy switch
+        {
+            "price_low_to_high" => filteredProducts.OrderBy(p => p.Price).ToList(),
+            "price_high_to_low" => filteredProducts.OrderByDescending(p => p.Price).ToList(),
+            _ => filteredProducts.OrderByDescending(p => p.Id).ToList(), // Default to newest
+        };
     }
 
     private bool Filter(Product product)
@@ -56,17 +82,17 @@
             return false;
         }
 
-        if (brands.Count > 0 && !brands.Any(b => b.Id == product.BrandId))
+        if (brands.Count > 0 && !brands.Any(brand => brand.Id == product.BrandId))
         {
             return false;
         }
 
-        if (sizes.Count > 0 && !string.IsNullOrEmpty(product.Size) && !sizes.Contains(product.Size))
+        if (sizes.Count > 0 && !sizes.Any(size => product.Sizes.Contains(size)))
         {
             return false;
         }
 
-        if (colors.Count > 0 && !colors.Contains(product.Color))
+        if (colors.Count > 0 && !colors.Any(color => product.Colors.Contains(color)))
         {
             return false;
         }

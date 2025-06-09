@@ -33,17 +33,17 @@
     <div>
         <label class="form-label">Farve</label>
 
-        <ColorSelector @bind-color="Model.Color" />
+        <ColorSelector @bind-colors="Model.Colors" />
 
-        <ValidationMessage For="@(() => Model.Color)" />
+        <ValidationMessage For="@(() => Model.Colors)" />
     </div>
 
     <div>
         <label class="form-label">Størrelse</label>
 
-        <InputText class="form-control" @bind-Value="Model.Size" />
+        <SizeSelector @bind-sizes="Model.Sizes" />
 
-        <ValidationMessage For="@(() => Model.Size)" />
+        <ValidationMessage For="@(() => Model.Sizes)" />
     </div>
 
     <div>

@@ -10,7 +10,7 @@
 
 @if (product is not null)
 {
-    <div class="d-flex flex-column gap-3 w-75 mx-auto">
+    <div class="d-flex flex-column gap-3">
         <div class="d-flex justify-content-between">
             <button class="btn btn-outline-secondary" @onclick="NavigateBack">Tilbage</button>
 
@@ -31,11 +31,7 @@
                 else
                 {
                     <div>
-                        <div class="d-flex gap-2 align-items-center">
-                            <span class="w-1rem h-1rem color @(ColorHelper.GetColorClass(product.Color)) rounded-circle"></span>
-
-                            <p class="text-body-seconday fs-7">@product.BrandName <span class="opacity-25">•</span> @product.CategoryName</p>
-                        </div>
+                        <p class="text-body-seconday fs-7">@product.BrandName <span class="opacity-25">•</span> @product.CategoryName</p>
 
                         <h1 class="fs-2 fw-semibold mt-1 pb-1">@product.Name</h1>
 
@@ -48,83 +44,65 @@
 
                     <h2 class="fw-semibold fs-3">@product.Price.ToString("C", CultureInfo.CurrentCulture)</h2>
 
-                    <div>
-                        <p class="text-body-seconday mb-2">@product.Description</p>
-
-                        <div class="d-flex align-items-center gap-2 fs-7">
-                            <div class="d-flex align-items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="text-success" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
-                                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"></path>
-                                </svg>
-
-                                <span>På lager</span>
-                            </div>
-
-                            <hr class="h-1rem" />
-
-                            <div class="d-flex align-items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
-                                    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-                                        <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2m10 0H9m10 0h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path>
-                                        <circle cx="17" cy="18" r="2"></circle>
-                                        <circle cx="7" cy="18" r="2"></circle>
-                                    </g>
-                                </svg>
-
-                                <span>Gratis fragt</span>
-                            </div>
-                        </div>
-                    </div>
+                    <hr class="w-100" />
 
                     <div>
                         <label class="mb-2">Farve:</label>
 
-                        <ColorSelector @bind-color="editProduct.Color" />
+                        <ColorSelector @bind-colors="colors" availableColors="product.Colors" single />
                     </div>
 
                     <div>
-                        <label>Størrelse:</label>
+                        <label class="mb-2">Størrelse:</label>
 
-                        <div class="d-flex">
-
-                        </div>
+                        <SizeSelector @bind-sizes="sizes" availableSizes="product.Sizes" single />
                     </div>
 
                     <div>
-                        <label>Antal:</label>
+                        <label class="mb-2">Antal:</label>
 
-                        <div class="input-group">
-                            <button class="btn btn-outline-secondary d-flex align-items-center" @onclick="() => amount = Math.Max(1, amount - 1)">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
-                                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"></path>
-                                </svg>
-                            </button>
-
-                            <InputNumber class="form-control w-25 flex-grow-0" @bind-Value="amount" min="1" max="100" step="1" />
-
-                            <button class="btn btn-outline-secondary d-flex align-items-center" @onclick="() => amount = Math.Min(100, amount + 1)">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
-                                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7v14"></path>
-                                </svg>
-                            </button>
-                        </div>
+                        <AmountSelector @bind-amount="amount" />
                     </div>
 
-                    <div class="d-flex mt-auto">
-                        <button class="btn btn-primary d-flex align-items-center justify-content-center gap-2 w-100" @onclick="AddToCart">
-                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" focusable="false" width="20" height="20" viewBox="0 0 24 24">
+                    <button class="btn btn-primary d-flex align-items-center justify-content-center gap-2 w-100" @onclick="AddToCart">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" focusable="false" width="20" height="20" viewBox="0 0 24 24">
+                            <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                                <circle cx="8" cy="21" r="1"></circle>
+                                <circle cx="19" cy="21" r="1"></circle>
+                                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                            </g>
+                        </svg>
+
+                        Læg i kurv
+                    </button>
+
+                    <hr class="w-100" />
+
+                    <h3 class="fw-semibold fs-5 mb-1">Produktdetaljer</h3>
+                    
+                    <p class="text-body-seconday mb-2">@product.Description</p>
+
+                    <div class="pt-3 border-top border-1 border-default d-flex gap-4 align-items-center fs-7">
+                        <div class="d-flex align-items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="text-success" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
+                                <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"></path>
+                            </svg>
+
+                            <span>På lager</span>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
                                 <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-                                    <circle cx="8" cy="21" r="1"></circle>
-                                    <circle cx="19" cy="21" r="1"></circle>
-                                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                                    <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2m10 0H9m10 0h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path>
+                                    <circle cx="17" cy="18" r="2"></circle>
+                                    <circle cx="7" cy="18" r="2"></circle>
                                 </g>
                             </svg>
 
-                            Læg i kurv
-                        </button>
-                    </div>
+                            <span>Gratis fragt</span>
+                        </div>
 
-                    <div class="pt-3 border-top border-1 border-default d-flex gap-4 align-items-center fs-7">
                         <div class="d-flex align-items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
                                 <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
@@ -168,6 +146,8 @@
 
     private Product? product;
 
+    private List<Colors> colors = new List<Colors>();
+    private List<string> sizes = new List<string>();
     private int amount = 1;
 
     private ProductFormModel editProduct = new ProductFormModel();
@@ -208,7 +188,31 @@
             return;
         }
 
-        CartService.AddToCart(Enumerable.Range(0, amount).Select(i => product));
+        if (colors.Count == 0 || sizes.Count == 0)
+        {
+            return; 
+        }
+
+        Product alteredProduct = new Product
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            Price = product.Price,
+            Colors = new List<Colors>(colors),
+            Sizes = new List<string>(sizes),
+            Quantity = amount,
+            Used = product.Used,
+            Image = product.Image,
+            BrandId = product.BrandId,
+            CategoryId = product.CategoryId,
+            UserId = product.UserId,
+            BrandName = product.BrandName,
+            CategoryName = product.CategoryName,
+            UserName = product.UserName
+        };
+
+        CartService.AddToCart(Enumerable.Range(0, amount).Select(i => alteredProduct).ToList());
     }
 
     private void NavigateBack()
@@ -243,8 +247,8 @@
             Name = product.Name,
             Description = product.Description,
             Price = product.Price,
-            Color = product.Color,
-            Size = product.Size,
+            Colors = product.Colors,
+            Sizes = product.Sizes,
             Quantity = product.Quantity,
             Used = product.Used,
             Image = product.Image,
@@ -269,8 +273,8 @@
             Name = editProduct.Name,
             Description = editProduct.Description,
             Price = editProduct.Price,
-            Color = editProduct.Color,
-            Size = editProduct.Size,
+            Colors = editProduct.Colors,
+            Sizes = editProduct.Sizes,
             Quantity = editProduct.Quantity,
             Used = editProduct.Used,
             Image = editProduct.Image,

@@ -8,9 +8,9 @@
 
         decimal Price { get; set; }
 
-        Colors Color { get; set; }
+        List<Colors> Colors { get; set; }
 
-        string Size { get; set; }
+        List<string> Sizes { get; set; }
         
         int Quantity { get; set; }
         

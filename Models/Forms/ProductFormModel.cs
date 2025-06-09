@@ -17,10 +17,12 @@ namespace Projekt.Models.Forms
         public decimal Price { get; set; }
 
         [Required(ErrorMessage = "Farve er påkrævet")]
-        public Colors Color { get; set; }
+        [MinLength(1, ErrorMessage = "Mindst én farve skal vælges")]
+        public List<Colors> Colors { get; set; } = new List<Colors>();
 
         [Required(ErrorMessage = "Størrelse er påkrævet")]
-        public string Size { get; set; } = string.Empty;
+        [MinLength(1, ErrorMessage = "Mindst én størrelse skal vælges")]
+        public List<string> Sizes { get; set; } = new List<string>();
 
         public int Quantity { get; set; }
 
@@ -51,8 +53,8 @@ namespace Projekt.Models.Forms
                 Name = Name,
                 Description = Description,
                 Price = Price,
-                Color = Color,
-                Size = Size,
+                Colors = Colors,
+                Sizes = Sizes,
                 Quantity = Quantity,
                 Used = Used,
                 Image = Image,

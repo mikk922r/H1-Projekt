@@ -18,17 +18,16 @@ namespace Projekt.Services
             => _orderedProducts.AsReadOnly();
 
         /// <summary>
-        /// Add a product to the orders list if it’s not already there (by Id).
+        /// Add a range of products to the orders list.
         /// </summary>
-        public void AddProduct(Product product)
+        public void AddProducts(List<Product> products)
         {
-            if (product == null) return;
-
-            // Prevent duplicates (optional)
-            if (_orderedProducts.Exists(p => p.Id == product.Id))
+            if (products is null)
+            {
                 return;
+            }
 
-            _orderedProducts.Add(product);
+            _orderedProducts.AddRange(products);
         }
 
         /// <summary>

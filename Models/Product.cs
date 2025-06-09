@@ -14,9 +14,9 @@ namespace Projekt.Models
 
         public decimal Price { get; set; }
 
-        public Colors Color { get; set; }
+        public List<Colors> Colors { get; set; } = new List<Colors>();
 
-        public string Size { get; set; } = string.Empty;
+        public List<string> Sizes { get; set; } = new List<string>();
 
         public int Quantity { get; set; }
 

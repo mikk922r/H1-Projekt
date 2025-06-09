@@ -42,7 +42,7 @@ namespace Projekt.Helpers
 
         public static List<Colors> GetColors()
         {
-            return Enum.GetValues(typeof(Colors)).Cast<Colors>().ToList();
+            return Enum.GetValues(typeof(Colors)).Cast<Colors>().OrderBy(GetColorName).ToList();
         }
     }
 }

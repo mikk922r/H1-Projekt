@@ -171,18 +171,23 @@ namespace Projekt.Services
 
             using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
 
+            List<ProductColor> colors = await GetProductColorsAsync();
+            List<ProductSize> sizes = await GetProductSizesAsync();
+
             List<Product> list = new List<Product>();
 
             while (await reader.ReadAsync())
             {
+                int productId = reader.GetInt32(0);
+
                 list.Add(new Product
                 {
-                    Id = reader.GetInt32(0),
+                    Id = productId,
                     Name = reader.GetString(1),
                     Description = reader.GetString(2),
                     Price = reader.GetDecimal(3),
-                    Color = ColorHelper.GetColorByValue(reader.GetInt32(4)),
-                    Size = reader.GetString(5),
+                    Colors = colors.Where(c => c.ProductId == productId).Select(c => c.Color).ToList(),
+                    Sizes = sizes.Where(c => c.ProductId == productId).Select(c => c.Size).ToList(),
                     Quantity = reader.GetInt32(6),
                     Used = reader.GetBoolean(7),
                     Image = reader.IsDBNull(8) ? null : reader.GetString(8),
@@ -202,8 +207,8 @@ namespace Projekt.Services
         public async Task<int?> AddProductAsync(Product product)
         {
             const string sql = @"
-                INSERT INTO products (name, description, price, color, size, quantity, used, image, brand_id, category_id, user_id)
-                VALUES (@name, @description, @price, @color, @size, @quantity, @used, @image, @brand, @category, @user)
+                INSERT INTO products (name, description, price, quantity, used, image, brand_id, category_id, user_id)
+                VALUES (@name, @description, @price, @quantity, @used, @image, @brand, @category, @user)
                 RETURNING id;
             ";
 
@@ -215,8 +220,6 @@ namespace Projekt.Services
             cmd.Parameters.AddWithValue("name", product.Name);
             cmd.Parameters.AddWithValue("description", product.Description);
             cmd.Parameters.AddWithValue("price", product.Price);
-            cmd.Parameters.AddWithValue("color", ColorHelper.GetColorValue(product.Color));
-            cmd.Parameters.AddWithValue("size", product.Size);
             cmd.Parameters.AddWithValue("quantity", product.Quantity);
             cmd.Parameters.AddWithValue("used", product.Used);
             cmd.Parameters.AddWithValue("brand", product.BrandId);
@@ -227,6 +230,12 @@ namespace Projekt.Services
             object? result = await cmd.ExecuteScalarAsync();
 
             int? id = result is not null ? (int)result : null;
+
+            if (id.HasValue)
+            {
+                await ReplaceProductColorsAsync(id.Value, product.Colors);
+                await ReplaceProductSizesAsync(id.Value, product.Sizes);
+            }
 
             return id;
         }
@@ -247,14 +256,17 @@ namespace Projekt.Services
                 return null;
             }
 
+            List<ProductColor> colors = await GetProductColorsAsync(id);
+            List<ProductSize> sizes = await GetProductSizesAsync(id);
+
             return new Product
             {
                 Id = reader.GetInt32(0),
                 Name = reader.GetString(1),
                 Description = reader.GetString(2),
                 Price = reader.GetDecimal(3),
-                Color = ColorHelper.GetColorByValue(reader.GetInt32(4)),
-                Size = reader.GetString(5),
+                Colors = colors.Select(c => c.Color).ToList(),
+                Sizes = sizes.Select(s => s.Size).ToList(),
                 Quantity = reader.GetInt32(6),
                 Used = reader.GetBoolean(7),
                 Image = reader.IsDBNull(8) ? null : reader.GetString(8),
@@ -274,8 +286,6 @@ namespace Projekt.Services
                     name        = @name,
                     description = @description,
                     price       = @price,
-                    color       = @color,
-                    size        = @size,
                     quantity    = @quantity,
                     used        = @used,
                     brand_id    = @brand,
@@ -291,8 +301,6 @@ namespace Projekt.Services
             cmd.Parameters.AddWithValue("name", product.Name);
             cmd.Parameters.AddWithValue("description", product.Description ?? string.Empty);
             cmd.Parameters.AddWithValue("price", product.Price);
-            cmd.Parameters.AddWithValue("color", ColorHelper.GetColorValue(product.Color));
-            cmd.Parameters.AddWithValue("size", product.Size);
             cmd.Parameters.AddWithValue("quantity", product.Quantity);
             cmd.Parameters.AddWithValue("used", product.Used);
             cmd.Parameters.AddWithValue("brand", product.BrandId);
@@ -301,7 +309,159 @@ namespace Projekt.Services
 
             int rowsAffected = await cmd.ExecuteNonQueryAsync();
 
+            bool colorsReplaced = await ReplaceProductColorsAsync(product.Id, product.Colors);
+
+            if (!colorsReplaced)
+            {
+                return false;
+            }
+
+            bool sizesReplaced = await ReplaceProductSizesAsync(product.Id, product.Sizes);
+
+            if (!sizesReplaced)
+            {
+                return false;
+            }
+
             return rowsAffected == 1;
+        }
+
+        #endregion
+
+        #region Products - Colors
+
+        private async Task<List<ProductColor>> GetProductColorsAsync(int productId = 0)
+        {
+            await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            using NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM products_colors WHERE (@product_id = 0 OR product_id = @product_id)", conn);
+
+            cmd.Parameters.AddWithValue("product_id", productId);
+
+            using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+            List<ProductColor> list = new List<ProductColor>();
+
+            while (await reader.ReadAsync())
+            {
+                list.Add(new ProductColor()
+                {
+                    ProductId = reader.GetInt32(1),
+                    Color = ColorHelper.GetColorByValue(reader.GetInt32(2))
+                });
+            }
+
+            return list;
+        }
+
+        private async Task<bool> ReplaceProductColorsAsync(int productId, List<Colors> colors)
+        {
+            await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            await using NpgsqlTransaction transaction = await conn.BeginTransactionAsync();
+
+            try
+            {
+                using (NpgsqlCommand deleteCmd = new NpgsqlCommand("DELETE FROM products_colors WHERE product_id = @product_id", conn))
+                {
+                    deleteCmd.Parameters.AddWithValue("product_id", productId);
+
+                    await deleteCmd.ExecuteNonQueryAsync();
+                }
+
+                int insertedCount = 0;
+
+                foreach (Colors color in colors)
+                {
+                    using NpgsqlCommand insertCmd = new NpgsqlCommand("INSERT INTO products_colors (product_id, color) VALUES (@product_id, @color)", conn);
+
+                    insertCmd.Parameters.AddWithValue("product_id", productId);
+                    insertCmd.Parameters.AddWithValue("color", ColorHelper.GetColorValue(color));
+
+                    insertedCount += await insertCmd.ExecuteNonQueryAsync();
+                }
+
+                await transaction.CommitAsync();
+
+                return insertedCount == colors.Count;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region Products - Sizes
+
+        private async Task<List<ProductSize>> GetProductSizesAsync(int productId = 0)
+        {
+            await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            using NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM products_sizes WHERE (@product_id = 0 OR product_id = @product_id)", conn);
+
+            cmd.Parameters.AddWithValue("product_id", productId);
+
+            using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+            List<ProductSize> list = new List<ProductSize>();
+
+            while (await reader.ReadAsync())
+            {
+                list.Add(new ProductSize()
+                {
+                    ProductId = reader.GetInt32(1),
+                    Size = reader.GetString(2)
+                });
+            }
+
+            return list;
+        }
+
+        private async Task<bool> ReplaceProductSizesAsync(int productId, List<string> sizes)
+        {
+            await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            await using NpgsqlTransaction transaction = await conn.BeginTransactionAsync();
+
+            try
+            {
+                using (NpgsqlCommand deleteCmd = new NpgsqlCommand("DELETE FROM products_sizes WHERE product_id = @product_id", conn))
+                {
+                    deleteCmd.Parameters.AddWithValue("product_id", productId);
+
+                    await deleteCmd.ExecuteNonQueryAsync();
+                }
+
+                int insertedCount = 0;
+
+                foreach (string size in sizes)
+                {
+                    using NpgsqlCommand insertCmd = new NpgsqlCommand("INSERT INTO products_sizes (product_id, size) VALUES (@product_id, @size)", conn);
+
+                    insertCmd.Parameters.AddWithValue("product_id", productId);
+                    insertCmd.Parameters.AddWithValue("size", size);
+
+                    insertedCount += await insertCmd.ExecuteNonQueryAsync();
+                }
+
+                await transaction.CommitAsync();
+
+                return insertedCount == sizes.Count;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+
+                throw;
+            }
         }
 
         #endregion

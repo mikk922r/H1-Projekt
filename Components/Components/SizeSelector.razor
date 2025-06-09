@@ -1,0 +1,41 @@
+﻿<div class="d-flex flex-wrap gap-2">
+    @foreach (string size in _availableSizes.Where(s => availableSizes.Contains(s)))
+    {
+        <button type="button" class="d-flex justify-content-center align-items-center rounded-2 text-black min-w-2rem min-h-2rem h-2rem border border-1 border-default @(sizes.Contains(size) ? " active" : "")" @onclick="() => SizeToggled(size)">@size</button>
+    }
+</div>
+
+@code {
+    private static List<string> _availableSizes = new List<string> { "XS", "S", "M", "L", "XL", "XXL" };
+
+    [Parameter]
+    public List<string> sizes { get; set; } = new List<string>();
+
+    [Parameter]
+    public EventCallback<List<string>> sizesChanged { get; set; }
+
+    [Parameter]
+    public List<string> availableSizes { get; set; } = _availableSizes;
+
+    [Parameter]
+    public bool single { get; set; } = false;
+
+    private void SizeToggled(string size)
+    {
+        if (single)
+        {
+            sizes.Clear();
+        }
+
+        if (sizes.Contains(size))
+        {
+            sizes.Remove(size);
+        }
+        else
+        {
+            sizes.Add(size);
+        }
+
+        sizesChanged.InvokeAsync(sizes);
+    }
+}

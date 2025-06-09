@@ -1,0 +1,15 @@
+﻿li:first-child {
+    max-height: 22.375rem;
+}
+
+.card {
+    min-height: 7.125rem;
+    min-width: 25rem;
+    height: 7.125rem;
+    width: 25rem;
+}
+
+    .card img {
+        object-fit: contain;
+        max-height: 6rem;
+    }
