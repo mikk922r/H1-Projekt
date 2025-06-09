@@ -4,10 +4,10 @@
 @inject OrderService OrderService
 @inject IJSRuntime JS
 
-<ul id="cart" class="dropdown-menu dropdown-menu-end">
+<ul id="cart" class="dropdown-menu dropdown-menu-end px-2">
     @if (groupedCart.Count > 0)
     {
-        <li class="d-flex flex-column gap-2 px-2 mb-2 overflow-y-auto">
+        <li class="d-flex flex-column gap-2 overflow-y-auto">
             @foreach (Product product in groupedCart)
             {
                 <div class="card d-flex flex-row align-items-center justify-content-between gap-2 p-2">
@@ -36,13 +36,23 @@
             }
         </li>
 
-        <li class="px-2">
+        <li class="my-3">
+            <div class="d-flex justify-content-between">
+                Subtotal: <span class="fw-semibold">@GetPrice().ToString("C", CultureInfo.CurrentCulture)</span>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                Levering: <span class="fw-semibold text-success">Gratis!</span>
+            </div>
+        </li>
+
+        <li>
             <button role="button" class="btn btn-success w-100" @onclick="Order">
                 Gå til kassen
             </button>
         </li>
     } else {
-        <li class="px-2">Der er ingen varer i din indkøbskurv.</li>
+        <li>Der er ingen varer i din indkøbskurv.</li>
     }
 </ul>
 
@@ -54,9 +64,16 @@
         return CartService.GetCart().Count(p => GetMatcher(p, product));
     }
 
-    private decimal GetPrice(Product product)
+    private decimal GetPrice(Product? product = null)
     {
-        return CartService.GetCart().Where(p => GetMatcher(p, product)).Sum(p => p.Price);
+        List<Product> cart = CartService.GetCart().ToList();
+
+        if (product is null)
+        {
+            return cart.Sum(p => p.Price);
+        }
+
+        return cart.Where(p => GetMatcher(p, product)).Sum(p => p.Price);
     }
 
     private void OnAmountChanged(Product product, int amount)

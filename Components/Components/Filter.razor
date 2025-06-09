@@ -8,7 +8,7 @@
     </div>
 
     <div class="mb-2 d-flex justify-content-between">
-        <h5>Pris</h5>
+        <h5>Pris:</h5>
 
         <h5>@minPrice.ToString("C", CultureInfo.CurrentCulture) - @maxPrice.ToString("C", CultureInfo.CurrentCulture)</h5>
     </div>
@@ -17,7 +17,7 @@
 
     <hr class="my-3" />
 
-    <h5 class="mb-2">Mærker</h5>
+    <h5 class="mb-2">Mærker:</h5>
 
     <div class="d-flex flex-column gap-2 overflow-x-hidden overflow-y-auto px-1" style="max-height: 20rem;">
         @foreach (Brand brand in _brands)
@@ -32,13 +32,13 @@
 
     <hr class="my-3" />
 
-    <h5 class="mb-2">Størrelser</h5>
+    <h5 class="mb-2">Størrelser:</h5>
 
     <SizeSelector sizes="sizes" sizesChanged="(value) => sizesChanged.InvokeAsync(value)" />
 
     <hr class="my-3" />
 
-    <h5 class="mb-2">Farver</h5>
+    <h5 class="mb-2">Farver:</h5>
 
     <ColorSelector colors="colors" colorsChanged="(value) => colorsChanged.InvokeAsync(value)" />
 </div>
