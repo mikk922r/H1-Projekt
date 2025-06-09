@@ -1,4 +1,4 @@
-﻿@page "/product-details/{ProductId:int}"
+@page "/product-details/{ProductId:int}"
 @rendermode InteractiveServer
 @inherits BasePage
 
@@ -186,7 +186,7 @@
                     <ValidationMessage For="@(() => reviewForm.Message)" />
                 </div>
 
-                <button type="submit" class="btn btn-primary">Lav bedømmelse</button>
+                <button type="submit" class="btn btn-primary w-fit">Lav bedømmelse</button>
             </EditForm>
         </div>
     }
