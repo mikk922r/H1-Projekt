@@ -20,6 +20,8 @@
         
         int UserId { get; set; }
 
+        List<Review> Reviews { get; set; }
+
         string BrandName { get; set; }
 
         string CategoryName { get; set; }

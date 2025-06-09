@@ -35,6 +35,8 @@ namespace Projekt.Models.Forms
         [Required(ErrorMessage = "Bruger er påkrævet")]
         public int UserId { get; set; }
 
+        public List<Review> Reviews { get; set; } = new List<Review>();
+
         public string BrandName { get; set; } = string.Empty;
 
         public string CategoryName { get; set; } = string.Empty;

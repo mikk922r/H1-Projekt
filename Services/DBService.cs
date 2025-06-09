@@ -153,7 +153,7 @@ namespace Projekt.Services
         public async Task<List<Product>> GetAllProductsAsync(int category = 0, int subCategory = 0)
         {
             string sql = @$"
-                SELECT p.* FROM get_products_with_names p
+                SELECT p.* FROM products_with_extra p
                 WHERE 
                     (@category = 0 OR 
                     (@sub_category = 0 AND p.category_id IN (SELECT id FROM categories WHERE parent_category_id = @category)) OR
@@ -173,6 +173,7 @@ namespace Projekt.Services
 
             List<ProductColor> colors = await GetProductColorsAsync();
             List<ProductSize> sizes = await GetProductSizesAsync();
+            List<Review> reviews = await GetAllReviewsAsync();
 
             List<Product> list = new List<Product>();
 
@@ -189,6 +190,7 @@ namespace Projekt.Services
                     Colors = colors.Where(c => c.ProductId == productId).Select(c => c.Color).ToList(),
                     Sizes = sizes.Where(c => c.ProductId == productId).Select(c => c.Size).ToList(),
                     Image = reader.IsDBNull(4) ? null : reader.GetString(4),
+                    Reviews = reviews.Where(r => r.ProductId == productId).ToList(),
                     BrandId = reader.GetInt32(5),
                     CategoryId = reader.GetInt32(6),
                     UserId = reader.GetInt32(7),
@@ -241,7 +243,7 @@ namespace Projekt.Services
             await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
-            using NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM get_products_with_names WHERE id = @id;", conn);
+            using NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM products_with_extra WHERE id = @id;", conn);
 
             cmd.Parameters.AddWithValue("id", id);
 
@@ -254,6 +256,7 @@ namespace Projekt.Services
 
             List<ProductColor> colors = await GetProductColorsAsync(id);
             List<ProductSize> sizes = await GetProductSizesAsync(id);
+            List<Review> reviews = await GetAllReviewsAsync(id);
 
             return new Product
             {
@@ -264,6 +267,7 @@ namespace Projekt.Services
                 Colors = colors.Select(c => c.Color).ToList(),
                 Sizes = sizes.Select(s => s.Size).ToList(),
                 Image = reader.IsDBNull(4) ? null : reader.GetString(4),
+                Reviews = reviews,
                 BrandId = reader.GetInt32(5),
                 CategoryId = reader.GetInt32(6),
                 UserId = reader.GetInt32(7),
@@ -452,6 +456,81 @@ namespace Projekt.Services
 
                 throw;
             }
+        }
+
+        #endregion
+
+        #region Reviews
+
+        public async Task<List<Review>> GetAllReviewsAsync(int productId = 0)
+        {
+            await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            using NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM reviews_with_extra WHERE (@product_id = 0 OR product_id = @product_id) ORDER BY created_at DESC", conn);
+
+            cmd.Parameters.AddWithValue("product_id", productId);
+
+            using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+            List<Review> list = new List<Review>();
+
+            while (await reader.ReadAsync())
+            {
+                list.Add(new Review
+                {
+                    Id = reader.GetInt32(0),
+                    ProductId = reader.GetInt32(1),
+                    UserId = reader.GetInt32(2),
+                    Title = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
+                    Message = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
+                    Rating = reader.GetInt32(5),
+                    CreatedAt = reader.GetDateTime(6),
+                    UserName = reader.IsDBNull(7) ? string.Empty : reader.GetString(7)
+                });
+            }
+
+            return list;
+        }
+
+        public async Task<int?> AddReviewAsync(Review review)
+        {
+            const string sql = @"
+                INSERT INTO reviews (product_id, user_id, title, message, rating)
+                VALUES (@product_id, @user_id, @title, @message, @rating)
+                RETURNING id;
+            ";
+
+            await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            using NpgsqlCommand cmd = new NpgsqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue("product_id", review.ProductId);
+            cmd.Parameters.AddWithValue("user_id", review.UserId);
+            cmd.Parameters.AddWithValue("title", string.IsNullOrWhiteSpace(review.Title) ? DBNull.Value : review.Title);
+            cmd.Parameters.AddWithValue("message", string.IsNullOrWhiteSpace(review.Message) ? DBNull.Value : review.Message);
+            cmd.Parameters.AddWithValue("rating", review.Rating);
+
+            object? result = await cmd.ExecuteScalarAsync();
+
+            int? id = result is not null ? (int)result : null;
+
+            return id;
+        }
+
+        public async Task<bool> DeleteReviewAsync(int id)
+        {
+            await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            using NpgsqlCommand cmd = new NpgsqlCommand("DELETE FROM reviews WHERE id = @id;", conn);
+
+            cmd.Parameters.AddWithValue("id", id);
+
+            int rowsAffected = await cmd.ExecuteNonQueryAsync();
+
+            return rowsAffected == 1;
         }
 
         #endregion
