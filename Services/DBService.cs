@@ -188,15 +188,13 @@ namespace Projekt.Services
                     Price = reader.GetDecimal(3),
                     Colors = colors.Where(c => c.ProductId == productId).Select(c => c.Color).ToList(),
                     Sizes = sizes.Where(c => c.ProductId == productId).Select(c => c.Size).ToList(),
-                    Quantity = reader.GetInt32(6),
-                    Used = reader.GetBoolean(7),
-                    Image = reader.IsDBNull(8) ? null : reader.GetString(8),
-                    BrandId = reader.GetInt32(9),
-                    CategoryId = reader.GetInt32(10),
-                    UserId = reader.GetInt32(11),
-                    BrandName = reader.GetString(12),
-                    CategoryName = reader.GetString(13),
-                    UserName = reader.IsDBNull(14) ? null : reader.GetString(14)
+                    Image = reader.IsDBNull(4) ? null : reader.GetString(4),
+                    BrandId = reader.GetInt32(5),
+                    CategoryId = reader.GetInt32(6),
+                    UserId = reader.GetInt32(7),
+                    BrandName = reader.GetString(8),
+                    CategoryName = reader.GetString(9),
+                    UserName = reader.IsDBNull(10) ? null : reader.GetString(10)
                 });
             }
 
@@ -220,8 +218,6 @@ namespace Projekt.Services
             cmd.Parameters.AddWithValue("name", product.Name);
             cmd.Parameters.AddWithValue("description", product.Description);
             cmd.Parameters.AddWithValue("price", product.Price);
-            cmd.Parameters.AddWithValue("quantity", product.Quantity);
-            cmd.Parameters.AddWithValue("used", product.Used);
             cmd.Parameters.AddWithValue("brand", product.BrandId);
             cmd.Parameters.AddWithValue("category", product.CategoryId);
             cmd.Parameters.AddWithValue("user", product.UserId);
@@ -267,15 +263,13 @@ namespace Projekt.Services
                 Price = reader.GetDecimal(3),
                 Colors = colors.Select(c => c.Color).ToList(),
                 Sizes = sizes.Select(s => s.Size).ToList(),
-                Quantity = reader.GetInt32(6),
-                Used = reader.GetBoolean(7),
-                Image = reader.IsDBNull(8) ? null : reader.GetString(8),
-                BrandId = reader.GetInt32(9),
-                CategoryId = reader.GetInt32(10),
-                UserId = reader.GetInt32(11),
-                BrandName = reader.GetString(12),
-                CategoryName = reader.GetString(13),
-                UserName = reader.IsDBNull(14) ? null : reader.GetString(14)
+                Image = reader.IsDBNull(4) ? null : reader.GetString(4),
+                BrandId = reader.GetInt32(5),
+                CategoryId = reader.GetInt32(6),
+                UserId = reader.GetInt32(7),
+                BrandName = reader.GetString(8),
+                CategoryName = reader.GetString(9),
+                UserName = reader.IsDBNull(10) ? null : reader.GetString(10)
             };
         }
 
@@ -286,8 +280,6 @@ namespace Projekt.Services
                     name        = @name,
                     description = @description,
                     price       = @price,
-                    quantity    = @quantity,
-                    used        = @used,
                     brand_id    = @brand,
                     category_id = @category
                  WHERE id = @id;
@@ -301,8 +293,6 @@ namespace Projekt.Services
             cmd.Parameters.AddWithValue("name", product.Name);
             cmd.Parameters.AddWithValue("description", product.Description ?? string.Empty);
             cmd.Parameters.AddWithValue("price", product.Price);
-            cmd.Parameters.AddWithValue("quantity", product.Quantity);
-            cmd.Parameters.AddWithValue("used", product.Used);
             cmd.Parameters.AddWithValue("brand", product.BrandId);
             cmd.Parameters.AddWithValue("category", product.CategoryId);
             cmd.Parameters.AddWithValue("id", product.Id);

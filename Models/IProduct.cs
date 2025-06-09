@@ -12,10 +12,6 @@
 
         List<string> Sizes { get; set; }
         
-        int Quantity { get; set; }
-        
-        bool Used { get; set; }
-
         string? Image { get; set; }
         
         int BrandId { get; set; }

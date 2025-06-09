@@ -24,10 +24,6 @@ namespace Projekt.Models.Forms
         [MinLength(1, ErrorMessage = "Mindst én størrelse skal vælges")]
         public List<string> Sizes { get; set; } = new List<string>();
 
-        public int Quantity { get; set; }
-
-        public bool Used { get; set; }
-
         public string? Image { get; set; }
 
         [Required(ErrorMessage = "Mærke er påkrævet")]
@@ -55,8 +51,6 @@ namespace Projekt.Models.Forms
                 Price = Price,
                 Colors = Colors,
                 Sizes = Sizes,
-                Quantity = Quantity,
-                Used = Used,
                 Image = Image,
                 BrandId = BrandId,
                 CategoryId = CategoryId,

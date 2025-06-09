@@ -18,10 +18,6 @@ namespace Projekt.Models
 
         public List<string> Sizes { get; set; } = new List<string>();
 
-        public int Quantity { get; set; }
-
-        public bool Used { get; set; }
-
         public string? Image { get; set; }
 
         [Required]

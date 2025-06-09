@@ -47,20 +47,6 @@
     </div>
 
     <div>
-        <label class="form-label">Antal</label>
-
-        <InputNumber class="form-control" @bind-Value="Model.Quantity" />
-
-        <ValidationMessage For="@(() => Model.Quantity)" />
-    </div>
-
-    <div class="form-check">
-        <InputCheckbox class="form-check-input" @bind-Value="Model.Used" />
-
-        <label class="form-check-label">Brugt?</label>
-    </div>
-
-    <div>
         <label class="form-label">Mærke</label>
 
         <InputSelect class="form-select" @bind-Value="Model.BrandId">
