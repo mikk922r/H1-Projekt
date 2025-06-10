@@ -1,19 +1,21 @@
 ﻿<div class="d-flex flex-wrap gap-2 px-1">
-    @foreach (Colors color in availableColors)
+    @foreach (Colors color in _availableColors.Where(s => allowedColors.Contains(s)))
     {
         <button type="button" class="color @(ColorHelper.GetColorClass(color) + (colors.Contains(color) ? " active" : "")) rounded-circle w-2rem h-2rem border border-1 border-default" @onclick="() => ToggleColor(color)"></button>
     }
 </div>
 
 @code {
+    private static List<Colors> _availableColors = ColorHelper.GetColors();
+
     [Parameter]
     public List<Colors> colors { get; set; } = new List<Colors>();
 
     [Parameter]
     public EventCallback<List<Colors>> colorsChanged { get; set; }
 
-    [Parameter] 
-    public List<Colors> availableColors { get; set; } = ColorHelper.GetColors();
+    [Parameter]
+    public List<Colors> allowedColors { get; set; } = _availableColors;
 
     [Parameter]
     public bool single { get; set; } = false;

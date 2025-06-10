@@ -1,4 +1,5 @@
 ﻿section > img {
+    max-width: calc(100% - 7rem);
     object-fit: contain;
 }
 

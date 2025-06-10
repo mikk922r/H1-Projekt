@@ -2,7 +2,7 @@
     <div class="d-flex flex-column gap-3">
         @foreach (string image in images)
         {
-            <button class="btn image rounded-3 d-flex p-0 border border-1 border-default @(GetSelectedImage() == image ? "active" : "")" @onclick="() => selectedImage = image">
+            <button type="button" class="image rounded-3 d-flex p-0 border border-1 border-default @(GetSelectedImage() == image ? "active" : "")" @onclick="() => selectedImage = image">
                 <img class="rounded-2 w-100 h-100" src="@image" />
             </button>
         }

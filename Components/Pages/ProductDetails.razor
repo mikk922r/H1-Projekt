@@ -1,4 +1,4 @@
-@page "/product-details/{ProductId:int}"
+﻿@page "/product-details/{ProductId:int}"
 @rendermode InteractiveServer
 @inherits BasePage
 
@@ -49,13 +49,13 @@
                     <div>
                         <label class="mb-2">Farve:</label>
 
-                        <ColorSelector @bind-colors="colors" availableColors="product.Colors" single />
+                        <ColorSelector @bind-colors="colors" allowedColors="product.Colors" single />
                     </div>
 
                     <div>
                         <label class="mb-2">Størrelse:</label>
 
-                        <SizeSelector @bind-sizes="sizes" availableSizes="product.Sizes" single />
+                        <SizeSelector @bind-sizes="sizes" allowedSizes="product.Sizes" single />
                     </div>
 
                     <div>
@@ -156,7 +156,7 @@
     </div>
 
     if (addingReview) {
-        <div class="card d-flex flex-column gap-2 mt-3 p-3">
+        <div class="card shadow-sm d-flex flex-column gap-2 mt-3 p-3">
             <h4 class="fs-4 fw-semibold">Skriv en bedømmelse</h4>
 
             <EditForm class="d-flex flex-column gap-3" Model="reviewForm" OnValidSubmit="HandleAddReview" FormName="AddReview">
@@ -193,7 +193,7 @@
 
     int reviewCount = ReviewsHelper.GetTotalReviews(product.Reviews);
 
-    <div class="card d-flex flex-column gap-3 mt-3 p-3">
+    <div class="card shadow-sm d-flex flex-column gap-3 mt-3 p-3">
         @if (reviewCount > 0) {
             for (int i = 0; i < reviewCount; i++) {
                 Review review = product.Reviews[i];
@@ -259,6 +259,15 @@
     protected override async Task OnInitializedAsync()
     {
         product = await DBService.GetProductByIdAsync(ProductId);
+
+        if (product is null) 
+        {
+            return;
+        }
+
+        colors.Add(ColorHelper.GetFirst(product.Colors));
+        sizes.Add(SizeHelper.GetFirst(product.Sizes));
+
         categories = await DBService.GetAllCategoriesAsync();
         brands = await DBService.GetAllBrandsAsync();
     }

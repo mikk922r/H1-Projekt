@@ -44,5 +44,10 @@ namespace Projekt.Helpers
         {
             return Enum.GetValues(typeof(Colors)).Cast<Colors>().OrderBy(GetColorName).ToList();
         }
+
+        public static Colors GetFirst(List<Colors> colors)
+        {
+            return GetColors().Where(colors.Contains).FirstOrDefault();
+        }
     }
 }

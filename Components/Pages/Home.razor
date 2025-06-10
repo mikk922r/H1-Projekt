@@ -13,7 +13,7 @@
 
     @if (!Auth.IsAuthenticated)
     {
-        <div class="card border-warning d-flex flex-column gap-3 p-3 w-75 text-center my-3">
+        <div class="card shadow-sm border-warning d-flex flex-column gap-3 p-3 w-75 text-center my-3">
             <h1 class="fs-4 fw-semibold text-center">Velkommen!</h1>
 
             <p>Du skal logge ind før du kan tilføje / købe produkter.</p>
@@ -27,7 +27,7 @@
     }
     else
     {
-        <div class="card d-flex flex-column gap-3 p-3 w-75 text-center my-3">
+        <div class="card shadow-sm d-flex flex-column gap-3 p-3 w-75 text-center my-3">
             <h1 class="fs-4 fw-semibold">Velkommen, @Auth.CurrentUser!.Name!</h1>
 
             <p>Få solgt dit produkt lige her!</p>
