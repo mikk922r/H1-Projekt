@@ -27,9 +27,11 @@ namespace Projekt.Models.Forms
         public string? Image { get; set; }
 
         [Required(ErrorMessage = "Mærke er påkrævet")]
+        [Range(1, int.MaxValue, ErrorMessage = "Mærke er påkrævet")]
         public int BrandId { get; set; }
 
         [Required(ErrorMessage = "Kategori er påkrævet")]
+        [Range(1, int.MaxValue, ErrorMessage = "Kategori er påkrævet")]
         public int CategoryId { get; set; }
 
         [Required(ErrorMessage = "Bruger er påkrævet")]

@@ -1,4 +1,8 @@
-﻿.card > img {
+﻿.card {
+    max-width: 18.75rem;
+}
+
+.card > img {
     object-fit: cover;
     width: 18.75rem;
     height: 25rem;
