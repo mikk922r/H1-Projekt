@@ -41,11 +41,15 @@
             <label class="form-label">Telefonnummer</label>
 
             <div class="input-group flex-nowrap d-flex">
-                <span class="input-group-text">+</span>
+                <span class="input-group-text">
+                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
+                        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7v14"></path>
+                    </svg>
+                </span>
 
-                <InputNumber class="form-control rounded-0 w-1 text-center" type="text" placeholder="45" @bind-Value="registerForm.PhoneCode" />
+                <InputNumber class="form-control rounded-0 w-3rem flex-grow-0 text-center" type="text" placeholder="45" @bind-Value="registerForm.PhoneCode" />
 
-                <InputText class="form-control rounded-start-0 w-75" placeholder="12345678" @bind-Value="registerForm.PhoneNumber" />
+                <InputText class="form-control rounded-start-0" placeholder="12345678" @bind-Value="registerForm.PhoneNumber" />
             </div>
 
             <ValidationMessage For="@(() => registerForm.PhoneCode)" />

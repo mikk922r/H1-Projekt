@@ -1,0 +1,237 @@
+﻿@page "/account"
+@rendermode InteractiveServer
+@inherits BasePage
+
+@inject DBService DB
+@inject NavigationManager Nav
+
+<PageTitle>Min Konto</PageTitle>
+
+@if (Auth.IsAuthenticated)
+{
+    <h1 class="fs-2 mb-4">Min Konto</h1>
+
+    <div class="d-flex gap-4">
+        <div class="card shadow-sm p-3 min-w-20rem w-20rem h-fit">
+            <div class="p-2 d-flex flex-column align-items-center">
+                <img src="/avatar.jpg" class="min-w-6rem w-6rem min-h-6rem h-6rem rounded-circle border border-1 border-default mb-3" />
+
+                <h3 class="fs-5 fw-semibold mb-1">@Auth.CurrentUser!.Name</h3>
+
+                <p class="fs-7 text-body-secondary">@Auth.CurrentUser!.Email</p>
+            </div>
+
+            <hr class="w-100 my-3" />
+
+            <div class="d-flex flex-column gap-2">
+                <button type="button" class="d-flex align-items-center gap-2 px-3 rounded-2 text-black min-h-2_5rem h-2_5rem border-0 shadow-none @(page == Pages.Profile ? "active" : "")" @onclick="() => page = Pages.Profile">
+                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" focusable="false" width="18" height="18" viewBox="0 0 24 24">
+                        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </g>
+                    </svg>
+
+                    Profil
+                </button>
+
+                <button type="button" class="d-flex align-items-center gap-2 px-3 rounded-2 text-black min-h-2_5rem h-2_5rem border-0 shadow-none @(page == Pages.Safety ? "active" : "")" @onclick="() => page = Pages.Safety">
+                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" focusable="false" width="18" height="18" viewBox="0 0 24 24">
+                        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+                    </svg>
+
+                    Sikkerhed
+                </button>
+            </div>
+
+            <hr class="w-100 my-3" />
+
+            <button type="button" class="d-flex align-items-center gap-2 px-3 rounded-2 text-danger min-h-2_5rem h-2_5rem border-0" @onclick="LogOut">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" focusable="false" width="18" height="18" viewBox="0 0 24 24">
+                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 17l5-5l-5-5m5 5H9m0 9H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                </svg>
+
+                Log ud
+            </button>
+        </div>
+
+        <div class="card shadow-sm p-3 w-100 h-fit">
+            <h3 class="fs-4 fw-semibold mb-3">@(page == Pages.Profile ? "Personoplysninger" : "Sikkerhedsindstillinger")</h3>
+
+            @if (page == Pages.Profile)
+            {
+                <EditForm class="d-flex flex-column gap-3" Model="userForm" OnValidSubmit="OnValidUserSubmit" FormName="EditUser">
+                    <DataAnnotationsValidator />
+
+                    <div>
+                        <label class="form-label">Navn</label>
+
+                        <InputText class="form-control" placeholder="Navn..." @bind-Value="userForm.Name" />
+
+                        <ValidationMessage For="@(() => userForm.Name)" />
+                    </div>
+
+                    <div>
+                        <label class="form-label">Email</label>
+
+                        <InputText class="form-control" type="email" placeholder="Email..." @bind-Value="userForm.Email" />
+
+                        <ValidationMessage For="@(() => userForm.Email)" />
+                    </div>
+
+                    <div>
+                        <label class="form-label">Telefonnummer</label>
+
+                        <div class="input-group flex-nowrap d-flex">
+                            <span class="input-group-text">
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
+                                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7v14"></path>
+                                </svg>
+                            </span>
+
+                            <InputNumber class="form-control rounded-0 w-3rem flex-grow-0 text-center" type="text" placeholder="45" @bind-Value="userForm.PhoneCode" />
+
+                            <InputText class="form-control rounded-start-0" placeholder="12345678" @bind-Value="userForm.PhoneNumber" />
+                        </div>
+
+                        <ValidationMessage For="@(() => userForm.PhoneCode)" />
+                        <ValidationMessage For="@(() => userForm.PhoneNumber)" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-fit">Gem ændringer</button>
+                </EditForm>
+            }
+            else if (page == Pages.Safety)
+            {
+                <h5 class="fs-5 mb-2">Skift adgangskode</h5>
+
+                <EditForm class="d-flex flex-column gap-3" Model="passwordForm" OnValidSubmit="OnValidPasswordSubmit" FormName="EditPassword">
+                    <DataAnnotationsValidator />
+
+                    <div>
+                        <label class="form-label">Nuværende Adgangskode</label>
+
+                        <InputText class="form-control" type="password" placeholder="Nuværende adgangskode..." @bind-Value="passwordForm.CurrentPassword" />
+
+                        <ValidationMessage For="@(() => passwordForm.CurrentPassword)" />
+                    </div>
+
+                    <div>
+                        <label class="form-label">Ny Adgangskode</label>
+
+                        <InputText class="form-control" type="password" placeholder="Ny adgangskode..." @bind-Value="passwordForm.Password" />
+
+                        <ValidationMessage For="@(() => passwordForm.Password)" />
+                    </div>
+
+                    <div>
+                        <label class="form-label">Bekræft Ny Adgangskode</label>
+
+                        <InputText class="form-control" type="password" placeholder="Bekræft ny adgangskode..." @bind-Value="passwordForm.ConfirmPassword" />
+
+                        <ValidationMessage For="@(() => passwordForm.ConfirmPassword)" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-fit">Opdater adgangskode</button>
+                </EditForm>
+
+                <hr class="w-100 my-3" />
+
+                <h5 class="fs-5 text-danger">Slet konto</h5>
+
+                <p class="my-2">Når du sletter din konto, kan det ikke fortrydes. Vær venligst sikker.</p>
+
+                <button class="btn btn-danger w-fit" @onclick="DeleteAccount">Slet</button>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private Pages page = Pages.Profile;
+
+    private UserFormModel userForm = new UserFormModel();
+    private PasswordFormModel passwordForm = new PasswordFormModel();
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        if (!Auth.IsAuthenticated)
+        {
+            Nav.NavigateTo("/login");
+
+            return;
+        }
+
+        userForm = new UserFormModel(Auth.CurrentUser!);
+    }
+
+    private async Task LogOut()
+    {
+        await Auth.SignOut();
+
+        Nav.NavigateTo("/login");
+    }
+
+    private async Task OnValidUserSubmit()
+    {
+        bool ok = await DB.UpdateUserAsync(userForm.ToEntity());
+
+        if (!ok)
+        {
+            return;
+        }
+
+        await Auth.SetCurrentUser(new User
+        {
+            Id = Auth.CurrentUser!.Id,
+            Name = userForm.Name,
+            Email = userForm.Email,
+            PhoneCode = userForm.PhoneCode,
+            PhoneNumber = userForm.PhoneNumber,
+            Password = Auth.CurrentUser.Password
+        });
+    }
+
+    private async Task OnValidPasswordSubmit(EditContext context)
+    {
+        if (!userForm.Id.HasValue)
+        {
+            return;
+        }
+
+        if (!PasswordHelper.Verify(Auth.CurrentUser!.Password, passwordForm.CurrentPassword))
+        {
+            return;
+        }
+
+        if (!passwordForm.Password.Equals(passwordForm.ConfirmPassword))
+        {
+            return;
+        }
+
+        string newPassword = PasswordHelper.Hash(passwordForm.Password);
+
+        bool ok = await DB.UpdateUserPasswordAsync(userForm.Id.Value, newPassword);
+
+        if (!ok)
+        {
+            return;
+        }
+
+        await Auth.SignOut();
+
+        Nav.NavigateTo("/login");
+    }
+
+    private async Task DeleteAccount()
+    {
+        await Auth.SignOut();
+
+        Nav.NavigateTo("/login");
+    }
+}

@@ -93,6 +93,48 @@ namespace Projekt.Services
             return id;
         }
 
+        public async Task<bool> UpdateUserAsync(User user)
+        {
+            const string sql = @"
+                UPDATE users SET 
+                    name         = @name,
+                    email        = @email,
+                    phone_code   = @phone_code,
+                    phone_number = @phone_number
+                 WHERE id = @id;
+            ";
+
+            await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            using NpgsqlCommand cmd = new NpgsqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue("name", user.Name);
+            cmd.Parameters.AddWithValue("email", user.Email);
+            cmd.Parameters.AddWithValue("phone_code", user.PhoneCode);
+            cmd.Parameters.AddWithValue("phone_number", user.PhoneNumber);
+            cmd.Parameters.AddWithValue("id", user.Id);
+
+            int rowsAffected = await cmd.ExecuteNonQueryAsync();
+
+            return rowsAffected == 1;
+        }
+
+        public async Task<bool> UpdateUserPasswordAsync(int userId, string password)
+        {
+            await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            using NpgsqlCommand cmd = new NpgsqlCommand("UPDATE users SET password = @password WHERE id = @id;", conn);
+
+            cmd.Parameters.AddWithValue("password", password);
+            cmd.Parameters.AddWithValue("id", userId);
+
+            int rowsAffected = await cmd.ExecuteNonQueryAsync();
+
+            return rowsAffected == 1;
+        }
+
         #endregion
 
         #region Brands

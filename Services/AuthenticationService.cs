@@ -37,9 +37,7 @@ namespace Projekt.Services
                 return null;
             }
 
-            SetCurrentUser(user);
-
-            await _protectedSessionStorage.SetAsync("currentUser", user);
+            await SetCurrentUser(user);
 
             return user;
         }
@@ -67,12 +65,7 @@ namespace Projekt.Services
             return user;
         }
 
-        public async Task SignOut()
-        {
-            SetCurrentUser(null);
-
-            await _protectedSessionStorage.DeleteAsync("currentUser");
-        }
+        public async Task SignOut() => await SetCurrentUser(null);
 
         public async Task CheckSessionStorage()
         {
@@ -88,7 +81,7 @@ namespace Projekt.Services
                 return;
             }
 
-            SetCurrentUser(user.Value);
+            await SetCurrentUser(user.Value);
         }
 
         protected virtual void OnCurrentUserChanged(User? e)
@@ -101,9 +94,18 @@ namespace Projekt.Services
             }
         }
 
-        public void SetCurrentUser(User? user)
+        public async Task SetCurrentUser(User? user)
         {
             CurrentUser = user;
+
+            if (user is not null)
+            {
+                await _protectedSessionStorage.SetAsync("currentUser", user);
+            }
+            else
+            {
+                await _protectedSessionStorage.DeleteAsync("currentUser");
+            }
 
             OnCurrentUserChanged(user);
         }

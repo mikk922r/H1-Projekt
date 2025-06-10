@@ -127,46 +127,44 @@
         categories = await DBService.GetAllCategoriesAsync();
     }
 
-    private async Task HandleFieldChanged(object? objectValue, Properties propertyName)
+    private async Task HandleFieldChanged(object? value, Properties propertyName)
     {
-        string value = objectValue?.ToString() ?? string.Empty;
+        string stringValue = value?.ToString() ?? string.Empty;
 
         switch (propertyName)
         {
             case Properties.Name:
-                Model.Name = value;
+                Model.Name = stringValue;
 
                 break;
             case Properties.Description:
-                Model.Description = value;
+                Model.Description = stringValue;
 
                 break;
             case Properties.Price:
-                if (decimal.TryParse(value, out decimal price))
+                if (decimal.TryParse(stringValue, out decimal price))
                 {
                     Model.Price = price;
                 }
 
                 break;
             case Properties.Colors:
-                Model.Colors = objectValue as List<Colors> ?? new List<Colors>();
+                Model.Colors = value as List<Colors> ?? new List<Colors>();
 
                 break;
             case Properties.Sizes:
-                Model.Sizes = objectValue as List<string> ?? new List<string>();
+                Model.Sizes = value as List<string> ?? new List<string>();
 
                 break;
             case Properties.BrandId:
-                if (int.TryParse(value, out int brandId))
+                if (int.TryParse(stringValue, out int brandId))
                 {
                     Model.BrandId = brandId;
                 }
 
                 break;
             case Properties.CategoryId:
-                Console.WriteLine($"CategoryId: {value}");
-
-                if (int.TryParse(value, out int categoryId))
+                if (int.TryParse(stringValue, out int categoryId))
                 {
                     Model.CategoryId = categoryId;
                 }
@@ -175,16 +173,5 @@
         }
 
         await OnFieldChanged.InvokeAsync();
-    }
-
-    private enum Properties
-    {
-        Name,
-        Description,
-        Price,
-        Colors,
-        Sizes,
-        BrandId,
-        CategoryId
     }
 }

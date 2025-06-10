@@ -1,4 +1,6 @@
-﻿namespace Projekt.Helpers
+﻿using Projekt.Models;
+
+namespace Projekt.Helpers
 {
     public static class SizeHelper
     {

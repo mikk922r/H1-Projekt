@@ -1,7 +1,7 @@
 ﻿<div class="d-flex flex-wrap gap-2">
     @foreach (string size in _availableSizes.Where(s => allowedSizes.Contains(s)))
     {
-        <button type="button" class="d-flex justify-content-center align-items-center rounded-2 text-black min-w-2rem min-h-2rem h-2rem border border-1 border-default @(sizes.Contains(size) ? " active" : "")" @onclick="() => SizeToggled(size)">@size</button>
+        <button type="button" class="d-flex justify-content-center align-items-center rounded-2 text-black min-w-2rem min-h-2rem h-2rem border border-1 border-default shadow-none @(sizes.Contains(size) ? " active" : "")" @onclick="() => SizeToggled(size)">@size</button>
     }
 </div>
 

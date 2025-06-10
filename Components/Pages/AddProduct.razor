@@ -41,14 +41,14 @@
             return;
         }
 
-        if (Auth.IsAuthenticated)
+        if (!Auth.IsAuthenticated)
         {
-            productModel.UserId = Auth.CurrentUser!.Id;
-
+            Nav.NavigateTo("/login");
+            
             return;
         }
 
-        Nav.NavigateTo("/login");
+        productModel.UserId = Auth.CurrentUser!.Id;
     }
 
     private Product GetPreviewProduct(ProductFormModel productModel)

@@ -364,7 +364,7 @@
 
     private async Task HandleValidSubmit()
     {
-        var ok = await DBService.UpdateProductAsync(productForm.ToEntity());
+        bool ok = await DBService.UpdateProductAsync(productForm.ToEntity());
 
         if (!ok)
         {

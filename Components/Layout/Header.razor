@@ -58,14 +58,6 @@
         <div class="d-flex justify-content-end flex-grow-1 gap-2">
             @if (Auth.IsAuthenticated)
             {
-                @* <NavLink class="text-nowrap btn btn-outline-success" href="/add-product">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
-                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-                    </svg>
-
-                    Tilføj Produkt
-                </NavLink> *@
-
                 <button type="button" class="position-relative text-nowrap d-flex align-items-center justify-content-center rounded-circle border border-0 py-0 px-2 gap-2 min-w-2_5rem w-2_5rem min-h-2_5rem h-2_5rem" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="20" height="20" viewBox="0 0 24 24">
                         <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
@@ -94,10 +86,42 @@
                     <span>@Auth.CurrentUser!.Name</span>
                 </button>
 
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><NavLink href="/account" class="dropdown-item">Min konto</NavLink></li>
-                    <li><NavLink href="/orders" class="dropdown-item">Mine ordrer</NavLink></li>
-                    <li><button class="dropdown-item danger" @onclick="LogOut">Log ud</button></li>
+                <ul class="dropdown-menu dropdown-menu-end px-2">
+                    <li class="d-flex flex-column gap-2">
+                        <NavLink href="/account" type="button" class="d-flex align-items-center gap-2 px-3 rounded-2 text-black min-h-2_5rem h-2_5rem border-0 shadow-none text-decoration-none" ActiveClass="active">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" focusable="false" width="18" height="18" viewBox="0 0 24 24">
+                                <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </g>
+                            </svg>
+
+                            Min konto
+                        </NavLink>
+                    </li>
+
+                    <li class="d-flex flex-column gap-2 my-2">
+                        <NavLink href="/orders" type="button" class="d-flex align-items-center gap-2 px-3 rounded-2 text-black min-h-2_5rem h-2_5rem border-0 shadow-none text-decoration-none" ActiveClass="active">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
+                                <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                                    <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73zm1 .27V12"></path>
+                                    <path d="M3.29 7L12 12l8.71-5M7.5 4.27l9 5.15"></path>
+                                </g>
+                            </svg>
+
+                            Mine ordrer
+                        </NavLink>
+                    </li>
+
+                    <li class="d-flex flex-column gap-2 border-top border-1 border-default pt-2">
+                        <button type="button" class="d-flex align-items-center gap-2 px-3 rounded-2 text-danger min-h-2_5rem h-2_5rem border-0" @onclick="LogOut">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" focusable="false" width="18" height="18" viewBox="0 0 24 24">
+                                <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 17l5-5l-5-5m5 5H9m0 9H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            </svg>
+
+                            Log ud
+                        </button>
+                    </li>
                 </ul>
             } else {
                 <a href="/login" class="btn btn-primary">Log ind</a>
