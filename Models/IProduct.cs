@@ -8,14 +8,10 @@
 
         decimal Price { get; set; }
 
-        Colors Color { get; set; }
+        List<Colors> Colors { get; set; }
 
-        string Size { get; set; }
+        List<string> Sizes { get; set; }
         
-        int Quantity { get; set; }
-        
-        bool Used { get; set; }
-
         string? Image { get; set; }
         
         int BrandId { get; set; }
@@ -23,6 +19,8 @@
         int CategoryId { get; set; }
         
         int UserId { get; set; }
+
+        List<Review> Reviews { get; set; }
 
         string BrandName { get; set; }
 

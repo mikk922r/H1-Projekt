@@ -49,13 +49,25 @@ hr {
     border-color: rgba(17, 17, 17, 0.15) !important;
 }
 
-button:focus {
+[type="button"]:not(.btn):focus {
     box-shadow: none;
 }
 
-button.active {
+[type="button"]:not(.btn).active {
     box-shadow: 0 0 0 1.6px white, 0 0 0 4px #258cfb;
 }
+
+[type="button"]:not(.btn, .color) {
+    transition: background-color .2s ease-in-out;
+    background-color: transparent;
+}
+
+    [type="button"]:not(.btn, .color).show,
+    [type="button"]:not(.btn, .color).active,
+    [type="button"]:not(.btn, .color):hover {
+        background-color: rgba(17, 17, 17, 0.1) !important;
+    }
+
 
 .w-fit {
     width: fit-content !important;
@@ -69,10 +81,6 @@ button.active {
     width: 25% !important;
 }
 
-.w-75 {
-    width: 75% !important;
-}
-
 .w-1rem {
     width: 1rem !important;
 }
@@ -81,8 +89,16 @@ button.active {
     width: 2rem !important;
 }
 
+.w-2_5rem {
+    width: 2.5rem !important;
+}
+
 .min-w-2rem {
     min-width: 2rem !important;
+}
+
+.min-w-2_5rem {
+    min-width: 2.5rem !important;
 }
 
 .h-fit {
@@ -97,8 +113,16 @@ button.active {
     height: 2rem !important;
 }
 
+.h-2_5rem {
+    height: 2.5rem !important;
+}
+
 .min-h-2rem {
     min-height: 2rem !important;
+}
+
+.min-h-2_5rem {
+    min-height: 2.5rem !important;
 }
 
 .fs-7 {
@@ -158,4 +182,3 @@ article.form {
 .color.brown {
     background-color: brown;
 }
-

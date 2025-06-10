@@ -8,63 +8,66 @@
 
 <PageTitle>Forside</PageTitle>
 
-<div class="container my-4">
-    <div class="row justify-content-center">
-        @if (!Auth.IsAuthenticated)
-        {
-            <div class="col-12 col-md-6 col-lg-4 text-center">
-                <img src="/uploads/front.jpg"
-                     alt="Forside banner"
-                     class="img-fluid rounded mb-4"
-                     style="max-height: 200px; object-fit: cover;" />
-                <div class="card border-warning">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">Velkommen!</h5>
-                        <p class="card-text flex-grow-1">Du skal logge ind før du kan tilføje / købe produkter.</p>
-                        <NavLink class="btn btn-primary mt-2" href="/login">Login</NavLink>
-                        <NavLink class="btn btn-outline-secondary mt-2" href="/register">Register</NavLink>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
+<div class="d-flex flex-column align-items-center gap-5 mx-auto w-50">
+    <img src="/front.jpg" alt="Forside banner" class="rounded-2" style="max-height: 200px; object-fit: cover;" />
 
-    @if (Auth.IsAuthenticated)
+    @if (!Auth.IsAuthenticated)
     {
-        <div class="row g-4 justify-content-center">
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body d-flex flex-column">
-                        <p class="card-text flex-grow-1">Få solgt dit produkt lige her!</p>
-                        <NavLink class="btn btn-success mt-auto" href="/add-product">Tilføj Produkt</NavLink>
-                    </div>
-                </div>
+        <div class="card border-warning d-flex flex-column gap-3 p-3 w-75 text-center my-3">
+            <h1 class="fs-4 fw-semibold text-center">Velkommen!</h1>
+
+            <p>Du skal logge ind før du kan tilføje / købe produkter.</p>
+
+            <div class="d-flex gap-3">
+                <NavLink class="btn btn-primary w-50" href="/login">Login</NavLink>
+
+                <NavLink class="btn btn-outline-secondary w-50" href="/register">Registrer</NavLink>
             </div>
         </div>
-    }
-
-    <h1 class="fs-1 my-4 text-center">Nyeste Produkter</h1>
-
-    @if (!products.Any())
-    {
-        <p class="m-auto fs-3 fw-semibold text-center">Kunne ikke finde nogle produkter...</p>
     }
     else
     {
-        <div class="d-flex flex-wrap justify-content-center gap-4">
-            @foreach (Product product in products.OrderByDescending(p => p.Id))
-            {
-                <ProductCard product="product" />
-            }
+        <div class="card d-flex flex-column gap-3 p-3 w-75 text-center my-3">
+            <h1 class="fs-4 fw-semibold">Velkommen, @Auth.CurrentUser!.Name!</h1>
+
+            <p>Få solgt dit produkt lige her!</p>
+
+            <NavLink class="btn btn-success" href="/add-product">Tilføj Produkt</NavLink>
         </div>
     }
+</div>
+
+<div class="d-flex flex-column align-items-center gap-4 mt-5">
+    <h1 class="fs-2">Nyeste Produkter</h1>
+
+    <InputSelect class="form-select w-fit" @bind-Value="sortBy">
+        <option value="newest">Nyeste</option>
+        <option value="price_low_to_high">Pris: Lav til Høj</option>
+        <option value="price_high_to_low">Pris: Høj til Lav</option>
+    </InputSelect>
+
+    <div class="d-flex flex-wrap gap-4">
+        @foreach (Product product in GetProducts())
+        {
+            <ProductCard product="product" />
+        }
+    </div>
 </div>
 
 @code {
     private List<Product> products = new List<Product>();
 
+    private string sortBy = "newest";
+
     protected override async Task OnInitializedAsync()
     {
         products = await DBService.GetAllProductsAsync();
     }
+
+    private List<Product> GetProducts() => sortBy switch
+    {
+        "price_low_to_high" => products.OrderBy(p => p.Price).ToList(),
+        "price_high_to_low" => products.OrderByDescending(p => p.Price).ToList(),
+        _ => products.OrderByDescending(p => p.Id).ToList(), // Default to newest
+    };
 }

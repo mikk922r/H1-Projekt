@@ -25,6 +25,18 @@
 
             input.value = value;
         };
+
+        window.closeCart = function () {
+            const cart = document.getElementById("cart");
+
+            if (!cart) return;
+
+            cart.previousElementSibling.classList.remove("show");
+
+            cart.classList.remove("show");
+
+            cart.removeAttribute("style");
+        }
     </script>
 </body>
 

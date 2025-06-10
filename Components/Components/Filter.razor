@@ -8,7 +8,7 @@
     </div>
 
     <div class="mb-2 d-flex justify-content-between">
-        <h5>Pris</h5>
+        <h5>Pris:</h5>
 
         <h5>@minPrice.ToString("C", CultureInfo.CurrentCulture) - @maxPrice.ToString("C", CultureInfo.CurrentCulture)</h5>
     </div>
@@ -17,7 +17,7 @@
 
     <hr class="my-3" />
 
-    <h5 class="mb-2">Mærker</h5>
+    <h5 class="mb-2">Mærker:</h5>
 
     <div class="d-flex flex-column gap-2 overflow-x-hidden overflow-y-auto px-1" style="max-height: 20rem;">
         @foreach (Brand brand in _brands)
@@ -32,29 +32,19 @@
 
     <hr class="my-3" />
 
-    <h5 class="mb-2">Størrelser</h5>
+    <h5 class="mb-2">Størrelser:</h5>
 
-    <div class="d-flex flex-wrap gap-2 px-1">
-        @foreach (string size in _sizes)
-        {
-            <label class="p-2 d-flex gap-2 align-items-center" style="margin: -8px;">
-                <input class="form-check-input mt-0" type="checkbox" checked="@sizes.Contains(size)" value="@size" @onchange="() => SizeToggled(size)" />
-
-                <span class="user-select-none">@size</span>
-            </label>
-        }
-    </div>
+    <SizeSelector sizes="sizes" sizesChanged="(value) => sizesChanged.InvokeAsync(value)" />
 
     <hr class="my-3" />
 
-    <h5 class="mb-2">Farver</h5>
+    <h5 class="mb-2">Farver:</h5>
 
     <ColorSelector colors="colors" colorsChanged="(value) => colorsChanged.InvokeAsync(value)" />
 </div>
 
 @code {
     private List<Brand> _brands = new List<Brand>();
-    private List<string> _sizes = new List<string> { "XS", "S", "M", "L", "XL", "XXL" };
 
     [Parameter]
     public int minPrice { get; set; } = 0;
@@ -122,19 +112,7 @@
         brandsChanged.InvokeAsync(brands);
     }
 
-    private void SizeToggled(string size)
-    {
-        if (sizes.Contains(size))
-        {
-            sizes.Remove(size);
-        }
-        else
-        {
-            sizes.Add(size);
-        }
-
-        sizesChanged.InvokeAsync(sizes);
-    }
+    
 }
 
 

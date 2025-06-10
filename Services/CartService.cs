@@ -15,7 +15,7 @@ namespace Projekt.Services
             OnCartChanged(_cart);
         }
 
-        public void AddToCart(IEnumerable<Product> products)
+        public void AddToCart(List<Product> products)
         {
             _cart.AddRange(products);
 
@@ -29,7 +29,24 @@ namespace Projekt.Services
             OnCartChanged(_cart);
         }
 
+        public void RemoveFromCart(List<Product> items)
+        {
+            foreach (Product item in items)
+            {
+                _cart.Remove(item);
+            }
+
+            OnCartChanged(_cart);
+        }
+
         public IReadOnlyList<Product> GetCart() => _cart.AsReadOnly();
+
+        public void ClearCart()
+        {
+            _cart.Clear();
+
+            OnCartChanged(_cart);
+        }
 
         protected virtual void OnCartChanged(List<Product> e)
         {

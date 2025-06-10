@@ -14,13 +14,9 @@ namespace Projekt.Models
 
         public decimal Price { get; set; }
 
-        public Colors Color { get; set; }
+        public List<Colors> Colors { get; set; } = new List<Colors>();
 
-        public string Size { get; set; } = string.Empty;
-
-        public int Quantity { get; set; }
-
-        public bool Used { get; set; }
+        public List<string> Sizes { get; set; } = new List<string>();
 
         public string? Image { get; set; }
 
@@ -31,6 +27,8 @@ namespace Projekt.Models
         public int CategoryId { get; set; }
 
         public int UserId { get; set; }
+
+        public List<Review> Reviews { get; set; } = new List<Review>();
 
         public string BrandName { get; set; } = string.Empty;
 

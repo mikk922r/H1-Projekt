@@ -7,7 +7,12 @@
         <div class="d-flex justify-content-between gap-3">
             <div>
                 <div class="d-flex gap-2 align-items-center">
-                    <span class="w-1rem h-1rem color @(ColorHelper.GetColorClass(product.Color)) rounded-circle"></span>
+                    <div class="d-flex gap-1">
+                        @foreach (Colors color in product.Colors)
+                        {
+                            <span class="w-1rem h-1rem color @(ColorHelper.GetColorClass(color)) rounded-circle border border-1 border-default"></span>
+                        }
+                    </div>
 
                     <p class="fs-8 text-body-secondary">@product.BrandName <span class="opacity-25">•</span> @product.CategoryName</p>
                 </div>
@@ -25,13 +30,13 @@
         <div class="d-flex align-items-center justify-content-between">
             <p class="fw-semibold fs-6">@product.Price.ToString("C", CultureInfo.CurrentCulture)</p>
 
-            @* <div class="d-flex gap-1 align-items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="14" height="14" viewBox="0 0 24 24">
+            <div class="d-flex gap-1 align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="text-warning" aria-hidden="true" role="img" width="14" height="14" viewBox="0 0 24 24">
                     <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.12 2.12 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.12 2.12 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16z"></path>
                 </svg>
 
-                <span class="fs-8">4.4</span>
-            </div> *@
+                <span class="fs-8">@ReviewsHelper.GetAverageRating(product.Reviews)</span>
+            </div>
         </div>
 
         @if (product.Id > 0)
@@ -49,5 +54,30 @@
     [Parameter]
     public Product product { get; set; }
 
-    private void AddToCart() => CartService.AddToCart(product);
+    private void AddToCart()
+    {
+        if (product is null)
+        {
+            return;
+        }
+
+        Product alteredProduct = new Product
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            Price = product.Price,
+            Colors = new List<Colors>() { product.Colors.First() },
+            Sizes = new List<string>() { product.Sizes.First() },
+            Image = product.Image,
+            BrandId = product.BrandId,
+            CategoryId = product.CategoryId,
+            UserId = product.UserId,
+            BrandName = product.BrandName,
+            CategoryName = product.CategoryName,
+            UserName = product.UserName
+        };
+
+        CartService.AddToCart(alteredProduct);
+    }
 }
