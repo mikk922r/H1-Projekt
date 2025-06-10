@@ -207,8 +207,8 @@ namespace Projekt.Services
         public async Task<int?> AddProductAsync(Product product)
         {
             const string sql = @"
-                INSERT INTO products (name, description, price, quantity, used, image, brand_id, category_id, user_id)
-                VALUES (@name, @description, @price, @quantity, @used, @image, @brand, @category, @user)
+                INSERT INTO products (name, description, price, image, brand_id, category_id, user_id)
+                VALUES (@name, @description, @price, @image, @brand, @category, @user)
                 RETURNING id;
             ";
 
