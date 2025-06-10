@@ -1,0 +1,29 @@
+﻿Forestil dig en hjemmeside hvor du let kan købe og sælge brugte ting – helt ligetil og overskueligt. Uanset om du leder efter en vintagejakke eller et par brugte sokker så finder du det her!
+
+Hvad kan du gøre på siden?
+
+Find nemt produkter efter dit ønske med vores filter og nemme navigation igennem siden. På forsiden finder du alle de lækre fremviste produkter.
+
+Se alle detaljer
+Klik på et produkt for at se billeder, pris, størrelser, farver og hvem der sælger varen.
+
+Vælg farve, størrelse og antal
+Er der flere varianter? Vælg den farve eller størrelse der passer dig bedst og angiv antal.
+
+Læg i kurven og køb
+Saml flere varer i din kurv og betal sikkert ;)
+
+Sælg dine egne ting
+Har du noget, du ikke bruger? Tag et billede og skriv en kort beskrivelse og fastsæt en pris – så går din annonce live på få sekunder.
+
+Særlige fordele
+
+Brugervenligt: Enkel opsætning og overskueligt design.
+
+Genbrug: I stedet for at smide ting ud, får dine ejendele nyt liv – godt for både pengepung og miljø.
+
+Her får du Køb og salg mellem brugere lokalt eller over hele landet!
+
+Hvordan fungerer det hele hvis man kigger på det tekniske?
+Bag kulisserne kører projektet som en Blazor-server-app i .NET. Så når du klikker på et produkt, henter siden detaljer fra en SQL database der så samtidig viser mærkenavn, kategorinavn og sælgers navn. Du kan redigere dine egne annoncer, skrive anmeldelser og se andres vurderinger direkte på produktsiden.
+
