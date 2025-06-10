@@ -186,7 +186,7 @@
                     <ValidationMessage For="@(() => reviewForm.Message)" />
                 </div>
 
-                <button type="submit" class="btn btn-primary">Lav bedømmelse</button>
+                <button type="submit" class="btn btn-primary w-fit">Lav bedømmelse</button>
             </EditForm>
         </div>
     }
@@ -376,7 +376,8 @@
             UserId = productForm.UserId,
             BrandName = product.BrandName,
             CategoryName = product.CategoryName,
-            UserName = product.UserName
+            UserName = product.UserName,
+            Reviews = product.Reviews
         };
 
         editMode = false;
@@ -417,8 +418,6 @@
         product.Reviews.Add(review);
 
         addingReview = false;
-
-        StateHasChanged();
     }
 
     private async Task DeleteReview(int reviewId)
