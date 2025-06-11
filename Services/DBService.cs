@@ -135,6 +135,20 @@ namespace Projekt.Services
             return rowsAffected == 1;
         }
 
+        public async Task<bool> DeleteUserAsync(int id)
+        {
+            await using NpgsqlConnection conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            using NpgsqlCommand cmd = new NpgsqlCommand("DELETE FROM users WHERE id = @id;", conn);
+
+            cmd.Parameters.AddWithValue("id", id);
+            
+            int rowsAffected = await cmd.ExecuteNonQueryAsync();
+            
+            return rowsAffected == 1;
+        }
+
         #endregion
 
         #region Brands

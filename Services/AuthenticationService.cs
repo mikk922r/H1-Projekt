@@ -2,7 +2,7 @@
 using Projekt.Helpers;
 using Projekt.Models;
 using Projekt.Models.Forms;
-using System.Threading.Tasks;
+using Projekt.Models.Enums;
 
 namespace Projekt.Services
 {
@@ -23,23 +23,23 @@ namespace Projekt.Services
 
         public bool IsAuthenticated => CurrentUser != null;
 
-        public async Task<User?> SignIn(string email, string password)
+        public async Task<LoginResult> SignIn(string email, string password)
         {
             User? user = await _dBService.GetUserByEmailAsync(email);
 
             if (user is null)
             {
-                return null;
+                return LoginResult.UserNotFound;
             }
 
             if (!PasswordHelper.Verify(user.Password, password))
             {
-                return null;
+                return LoginResult.InvalidPassword;
             }
 
             await SetCurrentUser(user);
 
-            return user;
+            return LoginResult.Success;
         }
 
         public async Task<User?> Register(RegisterFormModel registerForm)

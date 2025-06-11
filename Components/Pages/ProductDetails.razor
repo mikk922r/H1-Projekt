@@ -191,14 +191,11 @@
         </div>
     }
 
-    int reviewCount = ReviewsHelper.GetTotalReviews(product.Reviews);
-
     <div class="card shadow-sm d-flex flex-column gap-3 mt-3 p-3">
-        @if (reviewCount > 0) {
-            for (int i = 0; i < reviewCount; i++) {
-                Review review = product.Reviews[i];
-
-                <div class="@(i != reviewCount - 1 ? "border-bottom border-1 border-default pb-4" : "")">
+        @if (ReviewsHelper.GetTotalReviews(product.Reviews) > 0) {
+            foreach (Review review in product.Reviews.OrderByDescending(r => r.CreatedAt)) 
+            {
+                <div class="border-bottom border-not-last border-1 border-default pb-3">
                     <div class="d-flex align-items-center justify-content-between mb-3">
                         <div class="d-flex align-items-center gap-2">
                             <img src="/avatar.jpg" class="min-w-2_5rem w-2_5rem min-h-2_5rem h-2_5rem rounded-circle border border-1 border-default" />
@@ -206,7 +203,7 @@
                             <div class="d-flex flex-column">
                                 <h3 class="fs-6 fw-semibold">@review.UserName</h3>
 
-                                <span class="fs-8 text-body-secondary">@ReviewsHelper.GetTimeAgo(@review.CreatedAt)</span>
+                                <span class="fs-8 text-body-secondary">@ReviewsHelper.GetTimeAgo(review.CreatedAt)</span>
                             </div>
                         </div>
 
@@ -215,11 +212,34 @@
 
                             @if (Auth.IsAuthenticated && review.UserId == Auth.CurrentUser!.Id)
                             {
-                                <button type="button" class="d-flex justify-content-center align-items-center rounded-2 text-black fs-7 min-w-2rem min-h-2rem w-2rem h-2rem border-0" @onclick="() => DeleteReview(review.Id)">
+                                <button type="button" class="d-flex justify-content-center align-items-center rounded-2 text-black fs-7 min-w-2rem min-h-2rem w-2rem h-2rem border-0" data-bs-toggle="modal" data-bs-target=@("#modal" + review.Id)>
                                     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
                                         <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"></path>
                                     </svg>
                                 </button>
+
+                                <div class="modal fade" id=@("modal" + review.Id) tabindex="-1" aria-labelledby=@("deleteModalLabel" + review.Id) aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content p-3">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <h5 class="fs-4" id=@("deleteModalLabel" + review.Id)>Slet Bedømmelse</h5>
+
+                                                <button type="button" class="d-flex justify-content-center align-items-center rounded-2 text-black fs-7 min-w-2rem min-h-2rem w-2rem h-2rem border-0" data-bs-dismiss="modal" aria-label="Close">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
+                                                        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+
+                                            <p class="my-3">Er du sikker på, at du vil slette denne bedømmelse? Dette kan ikke fortrydes.</p>
+                            
+                                            <div class="d-flex gap-3">
+                                                <button type="button" class="btn btn-danger w-50" data-bs-dismiss="modal" @onclick="() => DeleteReview(review.Id)">Slet</button>
+                                                <button type="button" class="btn btn-secondary w-50" data-bs-dismiss="modal">Annullér</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             }
                         </div>
                     </div>
@@ -431,18 +451,20 @@
 
     private async Task DeleteReview(int reviewId)
     {
+        Console.WriteLine($"Deleting review with ID: {reviewId}");
+
         if (product is null)
         {
             return;
         }
         
-        bool ok = await DBService.DeleteReviewAsync(reviewId);
+        // bool ok = await DBService.DeleteReviewAsync(reviewId);
         
-        if (!ok)
-        {
-            return;
-        }
+        // if (!ok)
+        // {
+        //     return;
+        // }
 
-        product.Reviews.RemoveAll(r => r.Id == reviewId);
+        // product.Reviews.RemoveAll(r => r.Id == reviewId);
     }
 }

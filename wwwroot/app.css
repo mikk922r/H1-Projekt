@@ -49,6 +49,11 @@ hr {
     border-color: rgba(17, 17, 17, 0.15) !important;
 }
 
+.border-not-last:last-of-type {
+    padding-bottom: 0 !important;
+    border: none !important;
+}
+
 [type="button"]:not(.btn):focus {
     box-shadow: none;
 }

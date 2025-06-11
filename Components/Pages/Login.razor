@@ -64,13 +64,17 @@
 
     private async Task HandleLogin()
     {
-        User? user = await Auth.SignIn(loginForm.Email, loginForm.Password);
+        LoginResult user = await Auth.SignIn(loginForm.Email, loginForm.Password);
 
-        if (user is null)
+        switch (user)
         {
-            error = "Email eller adgangskode er forkert.";
+            case LoginResult.UserNotFound:
+                error = "Der findes ingen bruger med denne email.";
+                return;
 
-            return;
+            case LoginResult.InvalidPassword:
+                error = "Forkert adgangskode.";
+                return;
         }
 
         Nav.NavigateTo("/");

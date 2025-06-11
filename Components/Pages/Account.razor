@@ -141,7 +141,30 @@
 
                 <p class="my-2">Når du sletter din konto, kan det ikke fortrydes. Vær venligst sikker.</p>
 
-                <button class="btn btn-danger w-fit" @onclick="DeleteAccount">Slet</button>
+                <button class="btn btn-danger w-fit" data-bs-toggle="modal" data-bs-target="#deleteModal">Slet</button>
+
+                <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content p-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h5 class="fs-4" id="deleteModalLabel">Slet Konto</h5>
+
+                                <button type="button" class="d-flex justify-content-center align-items-center rounded-2 text-black fs-7 min-w-2rem min-h-2rem w-2rem h-2rem border-0" data-bs-dismiss="modal" aria-label="Close">
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="16" height="16" viewBox="0 0 24 24">
+                                        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <p class="my-3">Er du sikker på, at du vil slette din konto? Dette kan ikke fortrydes.</p>
+                            
+                            <div class="d-flex gap-3">
+                                <button type="button" class="btn btn-danger w-50" data-bs-dismiss="modal" @onclick="DeleteAccount">Slet</button>
+                                <button type="button" class="btn btn-secondary w-50" data-bs-dismiss="modal">Annullér</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             }
         </div>
     </div>
@@ -230,6 +253,8 @@
 
     private async Task DeleteAccount()
     {
+        await DB.DeleteUserAsync(Auth.CurrentUser!.Id);
+
         await Auth.SignOut();
 
         Nav.NavigateTo("/login");
