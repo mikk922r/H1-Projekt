@@ -60,21 +60,14 @@ else
                                          style="max-height: 50px; object-fit: cover;" />
                                 }
                             </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-secondary"
-                                        @onclick="() => RemoveFromOrders(prod)">
-                                    Fjern
-                                </button>
-                            </td>
+                  
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
 
-        <button class="btn btn-danger mt-3" @onclick="ClearOrders">
-            Ryd alle ordrer
-        </button>
+      
     }
 }
 
@@ -96,16 +89,7 @@ else
         Nav.NavigateTo("/login");
     }
 
-    private void RemoveFromOrders(Product prod)
-    {
-        OrderService.RemoveProduct(prod);
-        // Refresh our local copy so the UI re-renders
-        orderedList = OrderService.GetAllOrderedProducts();
-    }
 
-    private void ClearOrders()
-    {
-        OrderService.ClearOrders();
-        orderedList = OrderService.GetAllOrderedProducts();
-    }
+
+  
 }
