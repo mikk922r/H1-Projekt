@@ -7,89 +7,46 @@
 
 <PageTitle>Mine Ordrer</PageTitle>
 
-<h2 class="mb-4">Mine Ordrer</h2>
+<h1 class="fs-2 mb-4">Mine Ordrer</h1>
 
-@if (!Auth.IsAuthenticated)
-{
-    <div class="alert alert-warning">
-        Du skal være logget ind for at se dine ordrer.
-        <button class="btn btn-primary ms-2" @onclick="GoLogin">
-            Login
-        </button>
-    </div>
-}
-else
-{
-    @* Use the field 'orderedList' below; it was set in OnInitialized *@
-    @if (orderedList == null || orderedList.Count == 0)
+<div class="card shadow-sm rounded-2 p-3 gap-3">
+    @if (OrderService.GetOrders().Any())
     {
-        <div class="alert alert-info">
-            Du har ingen ordrer endnu. Klik på “Bestil” ved et produkt for at tilføje det her.
-        </div>
+        @foreach (Order order in OrderService.GetOrders().OrderByDescending(o => o.OrderedAt))
+        {
+            <div class="card p-3 flex-row justify-content-between">
+                <div class="d-flex flex-column gap-1 w-50">
+                    <div class="d-flex gap-2">
+                        <h3 class="fw-semibold">ORDRE-@order.Id</h3>
+
+                        <span class="badge rounded-pill text-bg-success">Leveret</span>
+                    </div>
+
+                    <p class="fs-7 text-body-secondary">Bestilt: @order.OrderedAt.ToString("dd/MM/yyyy HH:mm")</p>
+
+                    <p class="fs-7 mt-auto">Produkter: <span class="fw-semibold">@order.Products.Count</span> <span class="opacity-25">•</span> Subtotal: <span class="fw-semibold">@GetPrice(order)</span></p>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 w-50 justify-content-end my-auto">
+                    @foreach (Product product in order.Products)
+                    {
+                        <img src="@product.Image" alt="@product.Name" class="rounded-2 min-w-3rem w-3rem min-h-3rem h-3rem" />
+                    }
+                </div>
+            </div>
+        }
     }
     else
     {
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Produktnavn</th>
-                        <th>Pris</th>
-                        <th>Billede</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (int i = 0; i < orderedList.Count; i++)
-                    {
-                        var prod = orderedList[i];
-                        <tr>
-                            <td>@(i + 1)</td>
-                            <td>
-                                <a href="/product-details/@prod.Id">
-                                    @prod.Name
-                                </a>
-                            </td>
-                            <td>@string.Format("{0:C}", prod.Price)</td>
-                            <td>
-                                @if (!string.IsNullOrEmpty(prod.Image))
-                                {
-                                    <img src="@prod.Image"
-                                         alt="@prod.Name"
-                                         style="max-height: 50px; object-fit: cover;" />
-                                }
-                            </td>
-                  
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-
-      
+        <p class="fw-semibold mx-auto">Der er ingen ordrer at vise.</p>
     }
-}
+</div>
 
 @code {
-    // Holds the current session’s “bestilte” produkter.
-    private IReadOnlyList<Product> orderedList = Array.Empty<Product>();
-
-    protected override void OnInitialized()
+    private string GetPrice(Order order)
     {
-        if (Auth.IsAuthenticated)
-        {
-            // Initialize the list when the component first renders.
-            orderedList = OrderService.GetAllOrderedProducts();
-        }
+        decimal total = order.Products.Sum(p => p.Price);
+
+        return total.ToString("C", CultureInfo.CurrentCulture);
     }
-
-    private void GoLogin()
-    {
-        Nav.NavigateTo("/login");
-    }
-
-
-
-  
 }
