@@ -25,5 +25,5 @@ Genbrug: I stedet for at smide ting ud, får dine ejendele nyt liv – godt for 
 Her får du Køb og salg mellem brugere lokalt eller over hele landet!
 
 Hvordan fungerer det hele hvis man kigger på det tekniske?
-Bag kulisserne kører projektet som en Blazor-server-app i .NET. Så når du klikker på et produkt, henter siden detaljer fra en SQL database der så samtidig viser mærkenavn, kategorinavn og sælgers navn. Du kan redigere dine egne annoncer, skrive anmeldelser og se andres vurderinger direkte på produktsiden.
+Bag kulisserne kører projektet som en Blazor server app i .NET - Så når du klikker på et produkt, henter siden detaljer fra en SQL database der så samtidig viser mærkenavn, kategorinavn og sælgers navn. Du kan redigere dine egne annoncer, skrive anmeldelser og se andres vurderinger direkte på produktsiden.
 
