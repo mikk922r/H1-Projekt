@@ -10,18 +10,18 @@ namespace Projekt
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // 1) Add Blazor Server–style components:
+            // Server–style components:
             builder.Services
                 .AddRazorComponents()
                 .AddInteractiveServerComponents();
 
-            // 2) Your scoped services:
+            // Scoped services:
             builder.Services.AddScoped<DBService>();
             builder.Services.AddScoped<AuthenticationService>();
             builder.Services.AddScoped<OrderService>();
             builder.Services.AddScoped<CartService>();
 
-            // 3) Cookie-based auth:
+            // Cookie baseret auth:
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
@@ -29,7 +29,6 @@ namespace Projekt
                     options.LogoutPath = "/logout";
                 });
 
-            // 4) Build the app:
             var app = builder.Build();
 
             // 5) Middleware pipeline in exact order:
@@ -37,14 +36,14 @@ namespace Projekt
             app.UseStaticFiles();
             app.UseRouting();
 
-            // ?? Authentication + Authorization come before antiforgery
+            // Authentication + Authorization come before antiforgery
             app.UseAuthentication();
             app.UseAuthorization();
 
-            // ?? Now register the antiforgery middleware
+            // Now register the antiforgery middleware
             app.UseAntiforgery();
 
-            // 6) Map your Blazor components (no _Host page needed)
+         
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
