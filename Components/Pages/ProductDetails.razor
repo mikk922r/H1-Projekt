@@ -451,20 +451,18 @@
 
     private async Task DeleteReview(int reviewId)
     {
-        Console.WriteLine($"Deleting review with ID: {reviewId}");
-
         if (product is null)
         {
             return;
         }
         
-        // bool ok = await DBService.DeleteReviewAsync(reviewId);
+        bool ok = await DBService.DeleteReviewAsync(reviewId);
         
-        // if (!ok)
-        // {
-        //     return;
-        // }
+        if (!ok)
+        {
+            return;
+        }
 
-        // product.Reviews.RemoveAll(r => r.Id == reviewId);
+        product.Reviews.RemoveAll(r => r.Id == reviewId);
     }
 }

@@ -17,6 +17,17 @@
 
     private string selectedImage = string.Empty;
 
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!images.Contains(selectedImage))
+        {
+
+            selectedImage = string.Empty;
+        }
+
+        selectedImage = GetSelectedImage();
+    }
+
     private string GetSelectedImage()
     {
         if (!images.Any())

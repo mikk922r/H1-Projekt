@@ -81,14 +81,13 @@
         <ValidationMessage For="@(() => Model.CategoryId)" />
     </div>
 
-    @if (OnFileSelected.HasDelegate)
-    {
-        <div>
-            <label class="form-label">Upload Image</label>
+    <div>
+        <label class="form-label">Billede</label>
 
-            <InputFile OnChange="OnFileSelected" accept="image/*" class="form-control" />
-        </div>
-    }
+        <InputFile OnChange="OnFileSelected" accept="image/*" class="form-control" />
+
+        <ValidationMessage For="@(() => Model.Image)" />
+    </div>
 
     @if (FormName == "AddProduct")
     {
@@ -112,9 +111,6 @@
 
     [Parameter]
     public EventCallback OnFieldChanged { get; set; }
-
-    [Parameter]
-    public EventCallback<InputFileChangeEventArgs> OnFileSelected { get; set; }
 
     private List<Brand> brands = new List<Brand>();
 
@@ -173,5 +169,39 @@
         }
 
         await OnFieldChanged.InvokeAsync();
+    }
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            IBrowserFile file = e.File;
+
+            await using Stream stream = file.OpenReadStream(2 * 1024 * 1024);
+
+            byte[] buffer = new byte[file.Size];
+
+            int read = 0;
+
+            while (read < buffer.Length)
+            {
+                int chunk = await stream.ReadAsync(buffer, read, buffer.Length - read);
+
+                if (chunk == 0)
+                {
+                    break;
+                }
+
+                read += chunk;
+            }
+
+            string base64 = Convert.ToBase64String(buffer);
+
+            Model.Image = $"data:{file.ContentType};base64,{base64}";
+        }
+        catch
+        {
+            return;
+        }
     }
 }

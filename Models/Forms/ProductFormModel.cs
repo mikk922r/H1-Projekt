@@ -24,6 +24,7 @@ namespace Projekt.Models.Forms
         [MinLength(1, ErrorMessage = "Mindst én størrelse skal vælges")]
         public List<string> Sizes { get; set; } = new List<string>();
 
+        [Required(ErrorMessage = "Billede er påkrævet")]
         public string? Image { get; set; }
 
         [Required(ErrorMessage = "Mærke er påkrævet")]

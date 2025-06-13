@@ -340,6 +340,7 @@ namespace Projekt.Services
                     name        = @name,
                     description = @description,
                     price       = @price,
+                    image       = @image,
                     brand_id    = @brand,
                     category_id = @category
                  WHERE id = @id;
@@ -353,6 +354,7 @@ namespace Projekt.Services
             cmd.Parameters.AddWithValue("name", product.Name);
             cmd.Parameters.AddWithValue("description", product.Description ?? string.Empty);
             cmd.Parameters.AddWithValue("price", product.Price);
+            cmd.Parameters.AddWithValue("image", string.IsNullOrWhiteSpace(product.Image) ? DBNull.Value : product.Image);
             cmd.Parameters.AddWithValue("brand", product.BrandId);
             cmd.Parameters.AddWithValue("category", product.CategoryId);
             cmd.Parameters.AddWithValue("id", product.Id);

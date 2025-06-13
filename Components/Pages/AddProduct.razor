@@ -10,7 +10,7 @@
 
 <div class="d-flex gap-4">
     <div class="card flex-grow-1 shadow-sm p-3">
-        <ProductForm Model="productModel" OnValidSubmit="HandleSubmit" FormName="AddProduct" OnFieldChanged="() => StateHasChanged()" OnFileSelected="HandleFileSelected" />
+        <ProductForm Model="productModel" OnValidSubmit="HandleSubmit" FormName="AddProduct" OnFieldChanged="() => StateHasChanged()" />
     </div>
 
     <ProductCard product="GetPreviewProduct(productModel)" />
@@ -22,10 +22,6 @@
     private List<Brand> brands = new List<Brand>();
 
     private List<Category> categories = new List<Category>();
-
-    private IBrowserFile? selectedFile;
-
-    private string? previewImageUrl;
 
     protected override async Task OnInitializedAsync()
     {
@@ -60,7 +56,7 @@
             Price = productModel.Price,
             Colors = productModel.Colors,
             Sizes = productModel.Sizes,
-            Image = previewImageUrl,
+            Image = productModel.Image,
             BrandId = productModel.BrandId,
             CategoryId = productModel.CategoryId,
             UserId = Auth.IsAuthenticated ? Auth.CurrentUser!.Id : 0,
@@ -70,73 +66,8 @@
         };
     }
 
-    private async Task HandleFileSelected(InputFileChangeEventArgs e)
-    {
-        IBrowserFile file = selectedFile = e.File;
-
-        previewImageUrl = null;
-
-        try
-        {
-            await using Stream stream = file.OpenReadStream(2 * 1024 * 1024);
-
-            byte[] buffer = new byte[file.Size];
-
-            int read = 0;
-
-            while (read < buffer.Length)
-            {
-                int chunk = await stream.ReadAsync(buffer, read, buffer.Length - read);
-
-                if (chunk == 0)
-                {
-                    break;
-                }
-
-                read += chunk;
-            }
-
-            string base64 = Convert.ToBase64String(buffer);
-
-            previewImageUrl = $"data:{file.ContentType};base64,{base64}";
-        }
-        catch
-        {
-            return;
-        }
-    }
-
     private async Task HandleSubmit()
     {
-        if (selectedFile is not null)
-        {
-            try
-            {
-                string uploadsFolder = Path.Combine(Env.WebRootPath, "uploads");
-
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                }
-
-                string extension = Path.GetExtension(selectedFile.Name);
-
-                string uniqueFileName = $"{Guid.NewGuid()}{extension}";
-
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                await using FileStream fileStream = new FileStream(filePath, FileMode.Create);
-
-                await selectedFile.OpenReadStream(2 * 1024 * 1024).CopyToAsync(fileStream);
-
-                productModel.Image = Path.Combine("uploads", uniqueFileName).Replace("\\", "/");
-            }
-            catch
-            {
-                return;
-            }
-        }
-
         int? id = await DB.AddProductAsync(productModel.ToEntity());
 
         if (id is null)
