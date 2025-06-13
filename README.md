@@ -1,5 +1,5 @@
 ﻿# H1-Projekt
-S�dan starter man projektet. 
+Sådan starter man projektet. 
 - Start igennem https og tryk Ctrl F5 eller F5 - Eller tryk på den grønne pil i toppen af Visual Studio.
 - Eller start i terminalen med kommandoen `dotnet run` i mappen H1-Projekt.
 
